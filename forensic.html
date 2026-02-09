@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Forensic Toolkit</title>
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --bg2: #111827;
+            --bg3: #1f2937;
+            --accent: #10b981;
+            --accent2: #34d399;
+            --text: #f3f4f6;
+            --text2: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --border: #374151
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #0a0f1a);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--bg2);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all .2s;
+            font-size: .9rem
+        }
+
+        .tab:hover {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.1rem
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Consolas', monospace
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent)
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        button:hover {
+            background: var(--accent2)
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: .85rem
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px
+        }
+
+        .output-box {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            min-height: 60px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            position: relative
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 5px 10px;
+            font-size: .75rem
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--bg3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all .2s;
+            border: 1px solid transparent
+        }
+
+        .link-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px)
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s;
+            z-index: 1000
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .mt-10 {
+            margin-top: 10px
+        }
+
+        .mb-10 {
+            margin-bottom: 10px
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text2);
+            font-size: .9rem
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem
+        }
+
+        .ref-table th,
+        .ref-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .ref-table th {
+            color: var(--accent)
+        }
+
+        .ref-table code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--success)
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .dropzone:hover {
+            border-color: var(--accent);
+            background: var(--bg3)
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>LKS Forensic Toolkit <span class="badge">v2.0 PRO</span></h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="file">File Analysis</button>
+            <button class="tab" data-tab="hex">Hex Viewer</button>
+            <button class="tab" data-tab="strings">Strings</button>
+            <button class="tab" data-tab="stego">Steganography</button>
+            <button class="tab" data-tab="metadata">Metadata</button>
+            <button class="tab" data-tab="commands">Commands</button>
+            <button class="tab" data-tab="reference">Reference</button>
+        </div>
+
+        <!-- FILE ANALYSIS -->
+        <div id="file" class="panel active">
+            <div class="card">
+                <h3>File Analyzer</h3>
+                <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                    <p>Click or drag file here to analyze</p>
+                    <input type="file" id="fileInput" style="display:none" onchange="analyzeFile(this.files[0])">
+                </div>
+                <div class="output-box mt-10" id="fileOut" style="min-height:150px"></div>
+            </div>
+            <div class="card">
+                <h3>Magic Bytes Reference</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Magic Bytes</th>
+                        <th>Extension</th>
+                    </tr>
+                    <tr>
+                        <td>PNG</td>
+                        <td><code>89 50 4E 47 0D 0A 1A 0A</code></td>
+                        <td>.png</td>
+                    </tr>
+                    <tr>
+                        <td>JPEG</td>
+                        <td><code>FF D8 FF</code></td>
+                        <td>.jpg/.jpeg</td>
+                    </tr>
+                    <tr>
+                        <td>GIF</td>
+                        <td><code>47 49 46 38</code></td>
+                        <td>.gif</td>
+                    </tr>
+                    <tr>
+                        <td>PDF</td>
+                        <td><code>25 50 44 46</code></td>
+                        <td>.pdf</td>
+                    </tr>
+                    <tr>
+                        <td>ZIP/DOCX</td>
+                        <td><code>50 4B 03 04</code></td>
+                        <td>.zip/.docx</td>
+                    </tr>
+                    <tr>
+                        <td>RAR</td>
+                        <td><code>52 61 72 21</code></td>
+                        <td>.rar</td>
+                    </tr>
+                    <tr>
+                        <td>7z</td>
+                        <td><code>37 7A BC AF 27 1C</code></td>
+                        <td>.7z</td>
+                    </tr>
+                    <tr>
+                        <td>ELF</td>
+                        <td><code>7F 45 4C 46</code></td>
+                        <td>Linux executable</td>
+                    </tr>
+                    <tr>
+                        <td>EXE/DLL</td>
+                        <td><code>4D 5A</code></td>
+                        <td>.exe/.dll</td>
+                    </tr>
+                    <tr>
+                        <td>SQLite</td>
+                        <td><code>53 51 4C 69 74 65</code></td>
+                        <td>.db/.sqlite</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- HEX VIEWER -->
+        <div id="hex" class="panel">
+            <div class="card">
+                <h3>Hex Viewer/Editor</h3>
+                <div class="dropzone" id="hexDropzone" onclick="document.getElementById('hexFileInput').click()">
+                    <p>Click or drag file to view hex</p>
+                    <input type="file" id="hexFileInput" style="display:none" onchange="viewHex(this.files[0])">
+                </div>
+                <div class="output-box mt-10" id="hexOut" style="min-height:200px;max-height:400px;overflow:auto"></div>
+            </div>
+            <div class="card">
+                <h3>Hex Converter</h3>
+                <div class="grid-2">
+                    <div>
+                        <label>Hex</label>
+                        <textarea id="hexIn" placeholder="48 65 6c 6c 6f"></textarea>
+                    </div>
+                    <div>
+                        <label>ASCII</label>
+                        <textarea id="asciiIn" placeholder="Hello"></textarea>
+                    </div>
+                </div>
+                <div class="flex-row mt-10">
+                    <button onclick="hexToAscii()">Hex -> ASCII</button>
+                    <button onclick="asciiToHex()">ASCII -> Hex</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STRINGS -->
+        <div id="strings" class="panel">
+            <div class="card">
+                <h3>Extract Strings</h3>
+                <div class="dropzone" id="stringsDropzone"
+                    onclick="document.getElementById('stringsFileInput').click()">
+                    <p>Click or drag file to extract strings</p>
+                    <input type="file" id="stringsFileInput" style="display:none"
+                        onchange="extractStrings(this.files[0])">
+                </div>
+                <div class="flex-row mt-10">
+                    <label>Min Length: <input type="number" id="minLen" value="4" style="width:60px"></label>
+                    <label><input type="checkbox" id="flagOnly"> Flag format only</label>
+                </div>
+                <div class="output-box mt-10" id="stringsOut" style="min-height:200px;max-height:400px;overflow:auto">
+                </div>
+            </div>
+        </div>
+
+        <!-- STEGANOGRAPHY -->
+        <div id="stego" class="panel">
+            <div class="card">
+                <h3>LSB Steganography</h3>
+                <p class="mb-10" style="color:var(--text2)">Hide/extract data in image LSB</p>
+                <div class="dropzone" id="stegoDropzone" onclick="document.getElementById('stegoFileInput').click()">
+                    <p>Click or drag PNG/BMP image</p>
+                    <input type="file" id="stegoFileInput" accept="image/*" style="display:none"
+                        onchange="stegoAnalyze(this.files[0])">
+                </div>
+                <div class="flex-row mt-10">
+                    <button onclick="extractLSB()">Extract LSB</button>
+                    <button class="btn-secondary" onclick="analyzeColors()">Analyze Colors</button>
+                </div>
+                <canvas id="stegoCanvas" style="display:none"></canvas>
+                <div class="output-box mt-10" id="stegoOut" style="min-height:100px"></div>
+            </div>
+            <div class="card">
+                <h3>Steganography Tools</h3>
+                <div class="grid-3">
+                    <a href="https://futureboy.us/stegano/" target="_blank" class="link-card">Steghide Online</a>
+                    <a href="https://stylesuxx.github.io/steganography/" target="_blank" class="link-card">JS Stego</a>
+                    <a href="https://www.aperisolve.com/" target="_blank" class="link-card">Aperi'Solve</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Stego Cheatsheet</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Tool</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>steghide</td>
+                        <td><code>steghide extract -sf image.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td>zsteg</td>
+                        <td><code>zsteg image.png</code></td>
+                    </tr>
+                    <tr>
+                        <td>binwalk</td>
+                        <td><code>binwalk -e file</code></td>
+                    </tr>
+                    <tr>
+                        <td>foremost</td>
+                        <td><code>foremost -i file</code></td>
+                    </tr>
+                    <tr>
+                        <td>exiftool</td>
+                        <td><code>exiftool image.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td>strings</td>
+                        <td><code>strings file | grep -i flag</code></td>
+                    </tr>
+                    <tr>
+                        <td>xxd</td>
+                        <td><code>xxd file | head</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- METADATA -->
+        <div id="metadata" class="panel">
+            <div class="card">
+                <h3>Image Metadata Viewer</h3>
+                <div class="dropzone" id="metaDropzone" onclick="document.getElementById('metaFileInput').click()">
+                    <p>Click or drag image to view metadata</p>
+                    <input type="file" id="metaFileInput" accept="image/*" style="display:none"
+                        onchange="viewMetadata(this.files[0])">
+                </div>
+                <div class="output-box mt-10" id="metaOut" style="min-height:150px"></div>
+            </div>
+        </div>
+
+        <!-- COMMANDS -->
+        <div id="commands" class="panel">
+            <div class="card">
+                <h3>Forensic Commands</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Task</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>File type</td>
+                        <td><code>file suspicious_file</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hex dump</td>
+                        <td><code>xxd file | head -50</code></td>
+                    </tr>
+                    <tr>
+                        <td>Strings</td>
+                        <td><code>strings file | grep -iE "flag|ctf|key"</code></td>
+                    </tr>
+                    <tr>
+                        <td>Binwalk</td>
+                        <td><code>binwalk -e file</code></td>
+                    </tr>
+                    <tr>
+                        <td>Foremost</td>
+                        <td><code>foremost -i file -o output/</code></td>
+                    </tr>
+                    <tr>
+                        <td>Exiftool</td>
+                        <td><code>exiftool image.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td>Steghide</td>
+                        <td><code>steghide extract -sf image.jpg -p ""</code></td>
+                    </tr>
+                    <tr>
+                        <td>zsteg</td>
+                        <td><code>zsteg -a image.png</code></td>
+                    </tr>
+                    <tr>
+                        <td>PDF extract</td>
+                        <td><code>pdftotext file.pdf -</code></td>
+                    </tr>
+                    <tr>
+                        <td>ZIP password</td>
+                        <td><code>fcrackzip -u -D -p wordlist.txt file.zip</code></td>
+                    </tr>
+                    <tr>
+                        <td>Memory dump</td>
+                        <td><code>volatility -f dump.raw imageinfo</code></td>
+                    </tr>
+                    <tr>
+                        <td>Disk image</td>
+                        <td><code>fdisk -l image.dd</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Volatility Commands</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Task</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>Image info</td>
+                        <td><code>volatility -f dump imageinfo</code></td>
+                    </tr>
+                    <tr>
+                        <td>Process list</td>
+                        <td><code>volatility -f dump --profile=Win7SP1x64 pslist</code></td>
+                    </tr>
+                    <tr>
+                        <td>Network</td>
+                        <td><code>volatility -f dump --profile=Win7SP1x64 netscan</code></td>
+                    </tr>
+                    <tr>
+                        <td>Files</td>
+                        <td><code>volatility -f dump --profile=Win7SP1x64 filescan</code></td>
+                    </tr>
+                    <tr>
+                        <td>Registry</td>
+                        <td><code>volatility -f dump --profile=Win7SP1x64 hivelist</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hashdump</td>
+                        <td><code>volatility -f dump --profile=Win7SP1x64 hashdump</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- REFERENCE -->
+        <div id="reference" class="panel">
+            <div class="card">
+                <h3>External Tools</h3>
+                <div class="grid-3">
+                    <a href="https://www.aperisolve.com/" target="_blank" class="link-card">Aperi'Solve</a>
+                    <a href="https://gchq.github.io/CyberChef/" target="_blank" class="link-card">CyberChef</a>
+                    <a href="https://hexed.it/" target="_blank" class="link-card">HexEd.it</a>
+                    <a href="https://futureboy.us/stegano/" target="_blank" class="link-card">Steghide Online</a>
+                    <a href="https://29a.ch/photo-forensics/" target="_blank" class="link-card">FotoForensics</a>
+                    <a href="https://www.dcode.fr/en" target="_blank" class="link-card">dCode</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Flag Formats</h3>
+                <div class="output-box">flag{...} | FLAG{...} | CTF{...} | LKS{...} | picoCTF{...} | HTB{...}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        function $(id) { return document.getElementById(id) }
+        function showToast(m) { var t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 2000) }
+        function setOut(id, v) { $(id).textContent = v }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(function (tab) {
+            tab.onclick = function () {
+                document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active') });
+                document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active') });
+                tab.classList.add('active');
+                $(tab.dataset.tab).classList.add('active');
+            };
+        });
+
+        // Drag and drop
+        ['dropzone', 'hexDropzone', 'stringsDropzone', 'stegoDropzone', 'metaDropzone'].forEach(function (id) {
+            var el = $(id);
+            if (!el) return;
+            el.ondragover = function (e) { e.preventDefault(); el.style.borderColor = 'var(--accent)' };
+            el.ondragleave = function () { el.style.borderColor = 'var(--border)' };
+            el.ondrop = function (e) {
+                e.preventDefault();
+                el.style.borderColor = 'var(--border)';
+                var file = e.dataTransfer.files[0];
+                if (id === 'dropzone') analyzeFile(file);
+                else if (id === 'hexDropzone') viewHex(file);
+                else if (id === 'stringsDropzone') extractStrings(file);
+                else if (id === 'stegoDropzone') stegoAnalyze(file);
+                else if (id === 'metaDropzone') viewMetadata(file);
+            };
+        });
+
+        // File Analysis
+        function analyzeFile(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var bytes = new Uint8Array(e.target.result);
+                var magic = Array.from(bytes.slice(0, 16)).map(function (b) { return b.toString(16).padStart(2, '0').toUpperCase() }).join(' ');
+                var out = 'Filename: ' + file.name + '\n';
+                out += 'Size: ' + file.size + ' bytes (' + Math.round(file.size / 1024) + ' KB)\n';
+                out += 'Type: ' + file.type + '\n';
+                out += 'Last Modified: ' + new Date(file.lastModified).toLocaleString() + '\n\n';
+                out += 'Magic Bytes: ' + magic + '\n\n';
+                out += 'Detected Type: ' + detectMagic(bytes) + '\n';
+                setOut('fileOut', out);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function detectMagic(bytes) {
+            var hex = Array.from(bytes.slice(0, 8)).map(function (b) { return b.toString(16).padStart(2, '0') }).join('');
+            if (hex.startsWith('89504e47')) return 'PNG Image';
+            if (hex.startsWith('ffd8ff')) return 'JPEG Image';
+            if (hex.startsWith('47494638')) return 'GIF Image';
+            if (hex.startsWith('25504446')) return 'PDF Document';
+            if (hex.startsWith('504b0304')) return 'ZIP Archive / DOCX / XLSX';
+            if (hex.startsWith('52617221')) return 'RAR Archive';
+            if (hex.startsWith('377abcaf')) return '7z Archive';
+            if (hex.startsWith('7f454c46')) return 'ELF Executable (Linux)';
+            if (hex.startsWith('4d5a')) return 'PE Executable (Windows)';
+            if (hex.startsWith('53514c69')) return 'SQLite Database';
+            return 'Unknown';
+        }
+
+        // Hex Viewer
+        function viewHex(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var bytes = new Uint8Array(e.target.result);
+                var out = 'Offset    00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  ASCII\n';
+                out += '--------  -----------------------------------------------  ----------------\n';
+                var limit = Math.min(bytes.length, 2048);
+                for (var i = 0; i < limit; i += 16) {
+                    var hex = '', ascii = '';
+                    for (var j = 0; j < 16; j++) {
+                        if (i + j < bytes.length) {
+                            var b = bytes[i + j];
+                            hex += b.toString(16).padStart(2, '0').toUpperCase() + ' ';
+                            ascii += (b >= 32 && b < 127) ? String.fromCharCode(b) : '.';
+                        } else {
+                            hex += '   '; ascii += ' ';
+                        }
+                    }
+                    out += i.toString(16).padStart(8, '0') + '  ' + hex + ' ' + ascii + '\n';
+                }
+                if (bytes.length > limit) out += '\n... (showing first 2KB of ' + bytes.length + ' bytes)';
+                setOut('hexOut', out);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Hex Converter
+        function hexToAscii() {
+            var hex = $('hexIn').value.replace(/\s/g, '');
+            var ascii = '';
+            for (var i = 0; i < hex.length; i += 2) {
+                var code = parseInt(hex.substr(i, 2), 16);
+                ascii += (code >= 32 && code < 127) ? String.fromCharCode(code) : '.';
+            }
+            $('asciiIn').value = ascii;
+        }
+        function asciiToHex() {
+            var ascii = $('asciiIn').value;
+            var hex = [];
+            for (var i = 0; i < ascii.length; i++) {
+                hex.push(ascii.charCodeAt(i).toString(16).padStart(2, '0'));
+            }
+            $('hexIn').value = hex.join(' ');
+        }
+
+        // Strings
+        function extractStrings(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var bytes = new Uint8Array(e.target.result);
+                var minLen = parseInt($('minLen').value) || 4;
+                var flagOnly = $('flagOnly').checked;
+                var strings = [];
+                var current = '';
+                for (var i = 0; i < bytes.length; i++) {
+                    var b = bytes[i];
+                    if (b >= 32 && b < 127) {
+                        current += String.fromCharCode(b);
+                    } else {
+                        if (current.length >= minLen) strings.push(current);
+                        current = '';
+                    }
+                }
+                if (current.length >= minLen) strings.push(current);
+                if (flagOnly) {
+                    strings = strings.filter(function (s) {
+                        return /flag|ctf|lks|key|secret|password/i.test(s);
+                    });
+                }
+                setOut('stringsOut', 'Found ' + strings.length + ' strings:\n\n' + strings.join('\n'));
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Steganography
+        var stegoImage = null;
+        function stegoAnalyze(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = $('stegoCanvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    stegoImage = ctx.getImageData(0, 0, img.width, img.height);
+                    setOut('stegoOut', 'Image loaded: ' + img.width + 'x' + img.height + ' pixels\nClick Extract LSB to analyze');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function extractLSB() {
+            if (!stegoImage) { setOut('stegoOut', 'Load an image first'); return }
+            var data = stegoImage.data;
+            var bits = '';
+            for (var i = 0; i < data.length && bits.length < 8000; i += 4) {
+                bits += (data[i] & 1).toString();
+                bits += (data[i + 1] & 1).toString();
+                bits += (data[i + 2] & 1).toString();
+            }
+            var bytes = [];
+            for (var i = 0; i < bits.length; i += 8) {
+                bytes.push(parseInt(bits.substr(i, 8), 2));
+            }
+            var text = '';
+            for (var i = 0; i < bytes.length; i++) {
+                var b = bytes[i];
+                if (b >= 32 && b < 127) text += String.fromCharCode(b);
+                else if (b === 0) break;
+                else text += '.';
+            }
+            setOut('stegoOut', 'LSB Extract (first 1000 chars):\n' + text.substring(0, 1000));
+        }
+
+        function analyzeColors() {
+            if (!stegoImage) { setOut('stegoOut', 'Load an image first'); return }
+            var data = stegoImage.data;
+            var colors = {};
+            for (var i = 0; i < data.length; i += 4) {
+                var key = data[i] + ',' + data[i + 1] + ',' + data[i + 2];
+                colors[key] = (colors[key] || 0) + 1;
+            }
+            var unique = Object.keys(colors).length;
+            setOut('stegoOut', 'Unique colors: ' + unique + '\nTotal pixels: ' + (stegoImage.width * stegoImage.height) + '\n\nHigh unique count may indicate hidden data');
+        }
+
+        // Metadata
+        function viewMetadata(file) {
+            if (!file) return;
+            setOut('metaOut', 'Filename: ' + file.name + '\nSize: ' + file.size + ' bytes\nType: ' + file.type + '\nLast Modified: ' + new Date(file.lastModified).toLocaleString() + '\n\nNote: For full EXIF data, use exiftool or online tools like:\nhttps://www.metadata2go.com/');
+        }
+    </script>
+    <footer
+        style="text-align:center;padding:30px 20px;margin-top:40px;border-top:1px solid #333;color:#888;font-size:.9rem">
+        Made with &#10084; by <strong><a href="https://jovian.my.id" target="_blank"
+                style="color:#00d9ff">Jovian</a></strong> |
+        <a href="https://github.com/vian0001" target="_blank" style="color:#888">GitHub</a>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Crypto Toolkit</title>
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --bg2: #111827;
+            --bg3: #1f2937;
+            --accent: #f59e0b;
+            --accent2: #fbbf24;
+            --text: #f3f4f6;
+            --text2: #9ca3af;
+            --success: #10b981;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --border: #374151
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #0a0f1a);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--bg2);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all .2s;
+            font-size: .9rem
+        }
+
+        .tab:hover {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.1rem
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Consolas', monospace
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent)
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        button:hover {
+            background: var(--accent2)
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .btn-purple {
+            background: var(--purple);
+            color: #fff
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: .85rem
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px
+        }
+
+        .output-box {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            min-height: 60px;
+            word-break: break-all;
+            white-space: pre-wrap;
+            position: relative
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 5px 10px;
+            font-size: .75rem
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--bg3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all .2s;
+            border: 1px solid transparent
+        }
+
+        .link-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px)
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s;
+            z-index: 1000
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .mt-10 {
+            margin-top: 10px
+        }
+
+        .mb-10 {
+            margin-bottom: 10px
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text2);
+            font-size: .9rem
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem
+        }
+
+        .ref-table th,
+        .ref-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .ref-table th {
+            color: var(--accent)
+        }
+
+        .ref-table code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px
+        }
+
+        .text-success {
+            color: var(--success)
+        }
+
+        .text-warning {
+            color: var(--accent)
+        }
+
+        .text-danger {
+            color: var(--danger)
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .75rem;
+            margin-right: 5px;
+            background: var(--purple);
+            color: #fff
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>🔐 LKS Crypto Toolkit <span class="badge">v2.0 PRO</span></h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="ciphers">🔤 Ciphers</button>
+            <button class="tab" data-tab="rsa">🔢 RSA</button>
+            <button class="tab" data-tab="prng">🎲 PRNG</button>
+            <button class="tab" data-tab="aes">🔒 AES</button>
+            <button class="tab" data-tab="hash">🔑 Hash</button>
+            <button class="tab" data-tab="xor">⊕ XOR</button>
+            <button class="tab" data-tab="encoding">📦 Encoding</button>
+            <button class="tab" data-tab="reference">📚 Reference</button>
+        </div>
+
+        <!-- CIPHERS -->
+        <div id="ciphers" class="panel active">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>🔤 Caesar / ROT Cipher</h3>
+                    <textarea id="caesarIn" placeholder="Enter text..."></textarea>
+                    <div class="flex-row mt-10">
+                        <label>Shift:</label>
+                        <input type="number" id="caesarShift" value="13" min="0" max="25" style="width:80px">
+                        <button onclick="caesar(1)">Encode</button>
+                        <button onclick="caesar(-1)">Decode</button>
+                        <button class="btn-secondary" onclick="caesarBrute()">Brute All</button>
+                    </div>
+                    <div class="output-box mt-10" id="caesarOut"></div>
+                </div>
+                <div class="card">
+                    <h3>🔑 Vigenère Cipher</h3>
+                    <textarea id="vigIn" placeholder="Enter text..."></textarea>
+                    <input type="text" id="vigKey" placeholder="Key" class="mt-10">
+                    <div class="flex-row mt-10">
+                        <button onclick="vigenere(1)">Encode</button>
+                        <button onclick="vigenere(-1)">Decode</button>
+                    </div>
+                    <div class="output-box mt-10" id="vigOut"></div>
+                </div>
+                <div class="card">
+                    <h3>📐 Affine Cipher</h3>
+                    <textarea id="affineIn" placeholder="Enter text..."></textarea>
+                    <div class="flex-row mt-10">
+                        <label>a:</label><input type="number" id="affineA" value="5" style="width:60px">
+                        <label>b:</label><input type="number" id="affineB" value="8" style="width:60px">
+                        <button onclick="affine(1)">Encode</button>
+                        <button onclick="affine(-1)">Decode</button>
+                    </div>
+                    <div class="output-box mt-10" id="affineOut"></div>
+                </div>
+                <div class="card">
+                    <h3>🔄 Substitution Cipher</h3>
+                    <textarea id="subIn" placeholder="Enter text..."></textarea>
+                    <input type="text" id="subKey" placeholder="26-letter key (QWERTYUIOPASDFGHJKLZXCVBNM)"
+                        class="mt-10">
+                    <div class="flex-row mt-10">
+                        <button onclick="substitution(1)">Encode</button>
+                        <button onclick="substitution(-1)">Decode</button>
+                        <button class="btn-secondary" onclick="subAnalysis()">Frequency</button>
+                    </div>
+                    <div class="output-box mt-10" id="subOut"></div>
+                </div>
+                <div class="card">
+                    <h3>📡 Morse Code</h3>
+                    <textarea id="morseIn" placeholder="Text or Morse"></textarea>
+                    <div class="flex-row mt-10">
+                        <button onclick="morse(1)">Text → Morse</button>
+                        <button onclick="morse(-1)">Morse → Text</button>
+                    </div>
+                    <div class="output-box mt-10" id="morseOut"></div>
+                </div>
+                <div class="card">
+                    <h3>⬛ Atbash Cipher</h3>
+                    <textarea id="atbashIn" placeholder="Enter text..."></textarea>
+                    <button class="mt-10" onclick="atbash()">Encode/Decode</button>
+                    <div class="output-box mt-10" id="atbashOut"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RSA -->
+        <div id="rsa" class="panel">
+            <div class="card">
+                <h3>🔢 RSA Calculator</h3>
+                <div class="grid-2">
+                    <div><label>n (modulus)</label><input type="text" id="rsa_n" placeholder="Large number..."></div>
+                    <div><label>e (public exponent)</label><input type="text" id="rsa_e" value="65537"></div>
+                    <div><label>c (ciphertext)</label><input type="text" id="rsa_c" placeholder="Encrypted..."></div>
+                    <div><label>p (prime)</label><input type="text" id="rsa_p" placeholder="First prime..."></div>
+                    <div><label>q (prime)</label><input type="text" id="rsa_q" placeholder="Second prime..."></div>
+                    <div><label>d (private key)</label><input type="text" id="rsa_d" placeholder="Calculated..."></div>
+                </div>
+                <div class="flex-row mt-10">
+                    <button onclick="rsaDecrypt()">🔓 Decrypt</button>
+                    <button class="btn-secondary" onclick="rsaClear()">Clear</button>
+                    <a href="https://factordb.com" target="_blank"><button class="btn-purple">FactorDB →</button></a>
+                </div>
+                <div class="output-box mt-10" id="rsaOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>⚔️ RSA Attacks</h3>
+                <div class="grid-4 mb-10">
+                    <button onclick="rsaAutoAttack()" class="btn-purple">🚀 Auto Attack</button>
+                    <button onclick="rsaSmallE()" class="btn-secondary">🎯 Small e</button>
+                    <button onclick="rsaFermat()" class="btn-secondary">🔍 Fermat</button>
+                    <button onclick="rsaTrialDiv()" class="btn-secondary">🔢 Trial Div</button>
+                </div>
+                <div class="output-box mt-10" id="rsaAttackOut"></div>
+            </div>
+
+
+            <div class="card">
+                <h3>📡 Hastad's Broadcast Attack</h3>
+                <p class="text-secondary mb-10">Untuk e=3 dengan 3 ciphertext berbeda dan modulus berbeda</p>
+                <div class="grid-3">
+                    <div><label>n1</label><input type="text" id="hastad_n1"></div>
+                    <div><label>n2</label><input type="text" id="hastad_n2"></div>
+                    <div><label>n3</label><input type="text" id="hastad_n3"></div>
+                    <div><label>c1</label><input type="text" id="hastad_c1"></div>
+                    <div><label>c2</label><input type="text" id="hastad_c2"></div>
+                    <div><label>c3</label><input type="text" id="hastad_c3"></div>
+                </div>
+                <button class="mt-10" onclick="hastadAttack()">🚀 Run Hastad Attack</button>
+                <div class="output-box mt-10" id="hastadOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔗 Common Modulus Attack</h3>
+                <p class="text-secondary mb-10">Ketika 2 ciphertext pakai n sama tapi e berbeda (e1, e2 coprime)</p>
+                <div class="grid-2">
+                    <div><label>n (shared)</label><input type="text" id="cm_n"></div>
+                    <div><label>e1</label><input type="text" id="cm_e1"></div>
+                    <div><label>c1</label><input type="text" id="cm_c1"></div>
+                    <div><label>e2</label><input type="text" id="cm_e2"></div>
+                    <div><label>c2</label><input type="text" id="cm_c2"></div>
+                </div>
+                <button class="mt-10" onclick="commonModulus()">🚀 Run Attack</button>
+                <div class="output-box mt-10" id="cmOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔢 Multi-prime RSA</h3>
+                <p class="text-secondary mb-10">RSA dengan lebih dari 2 prime factor</p>
+                <div class="grid-2">
+                    <div><label>n</label><input type="text" id="mp_n"></div>
+                    <div><label>e</label><input type="text" id="mp_e" value="65537"></div>
+                    <div><label>c</label><input type="text" id="mp_c"></div>
+                    <div><label>Primes (comma separated)</label><input type="text" id="mp_primes"
+                            placeholder="p1,p2,p3,..."></div>
+                </div>
+                <button class="mt-10" onclick="multiPrimeRSA()">🔓 Decrypt</button>
+                <div class="output-box mt-10" id="mpOut"></div>
+            </div>
+        </div>
+
+        <!-- PRNG -->
+        <div id="prng" class="panel">
+            <div class="card">
+                <h3>🎲 LCG Predictor</h3>
+                <p class="text-secondary mb-10">Linear Congruential Generator: X_{n+1} = (a*X_n + c) mod m</p>
+                <div class="grid-2">
+                    <div><label>Known Outputs (comma separated)</label><input type="text" id="lcg_outputs"
+                            placeholder="x1,x2,x3,x4,x5,x6"></div>
+                    <div><label>Modulus m (optional)</label><input type="text" id="lcg_m"
+                            placeholder="Auto-detect if empty"></div>
+                </div>
+                <button class="mt-10" onclick="lcgCrack()">🔍 Crack LCG</button>
+                <div class="output-box mt-10" id="lcgOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🌀 Mersenne Twister (MT19937)</h3>
+                <p class="text-secondary mb-10">Butuh 624 output berturut-turut untuk recover state</p>
+                <textarea id="mt_outputs" placeholder="Paste 624 numbers (one per line or comma separated)"
+                    style="min-height:100px"></textarea>
+                <button class="mt-10" onclick="mtUntwist()">🔄 Untwist State</button>
+                <div class="output-box mt-10" id="mtOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>📊 LFSR Helper</h3>
+                <p class="text-secondary mb-10">Linear Feedback Shift Register analysis</p>
+                <input type="text" id="lfsr_bits" placeholder="Known output bits (e.g., 1011001010...)">
+                <input type="text" id="lfsr_taps" placeholder="Tap positions (e.g., 16,14,13,11)" class="mt-10">
+                <button class="mt-10" onclick="lfsrAnalyze()">🔍 Analyze LFSR</button>
+                <div class="output-box mt-10" id="lfsrOut"></div>
+            </div>
+        </div>
+
+        <!-- AES -->
+        <div id="aes" class="panel">
+            <div class="card">
+                <h3>🔒 AES Mode Detector</h3>
+                <p class="text-secondary mb-10">Paste hex ciphertext untuk detect mode</p>
+                <textarea id="aes_ct" placeholder="Paste ciphertext (hex)..."></textarea>
+                <button class="mt-10" onclick="aesDetect()">🔍 Detect Mode</button>
+                <div class="output-box mt-10" id="aesDetectOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🎭 ECB Cut & Paste</h3>
+                <p class="text-secondary mb-10">ECB mode encrypts identical blocks to identical ciphertext</p>
+                <textarea id="ecb_blocks"
+                    placeholder="Paste multiple blocks (16 bytes hex each, one per line)"></textarea>
+                <button class="mt-10" onclick="ecbAnalyze()">🔍 Find Duplicate Blocks</button>
+                <div class="output-box mt-10" id="ecbOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔀 CBC Bit-Flipping Calculator</h3>
+                <p class="text-secondary mb-10">Modify ciphertext to change plaintext after decryption</p>
+                <div class="grid-2">
+                    <div><label>Original plaintext block (hex)</label><input type="text" id="cbc_orig"
+                            placeholder="e.g., 61646d696e3d66616c7365"></div>
+                    <div><label>Target plaintext block (hex)</label><input type="text" id="cbc_target"
+                            placeholder="e.g., 61646d696e3d747275650"></div>
+                    <div><label>Previous ciphertext block (hex)</label><input type="text" id="cbc_prev"
+                            placeholder="The block before the target"></div>
+                </div>
+                <button class="mt-10" onclick="cbcBitflip()">🔧 Calculate Modified Block</button>
+                <div class="output-box mt-10" id="cbcOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>📚 AES Mode Cheatsheet</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Mode</th>
+                        <th>Vulnerability</th>
+                        <th>Attack</th>
+                    </tr>
+                    <tr>
+                        <td><code>ECB</code></td>
+                        <td>Same plaintext → same ciphertext</td>
+                        <td>Block swapping, pattern analysis</td>
+                    </tr>
+                    <tr>
+                        <td><code>CBC</code></td>
+                        <td>IV reuse, bit-flipping</td>
+                        <td>Padding oracle, bit-flip to modify plaintext</td>
+                    </tr>
+                    <tr>
+                        <td><code>CTR</code></td>
+                        <td>Nonce reuse</td>
+                        <td>XOR ciphertexts to get XOR of plaintexts</td>
+                    </tr>
+                    <tr>
+                        <td><code>GCM</code></td>
+                        <td>Nonce reuse</td>
+                        <td>Authentication bypass, forgery</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- HASH -->
+        <div id="hash" class="panel">
+            <div class="card">
+                <h3>🔑 Hash Identifier</h3>
+                <input type="text" id="hashIn" placeholder="Paste hash here...">
+                <button class="mt-10" onclick="identifyHash()">Identify</button>
+                <div class="output-box mt-10" id="hashIdOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>📏 Length Extension Attack</h3>
+                <p class="text-secondary mb-10">Untuk MD5, SHA1, SHA256 (Merkle-Damgård construction)</p>
+                <div class="grid-2">
+                    <div><label>Known Hash (hex)</label><input type="text" id="lea_hash"></div>
+                    <div><label>Original Message Length (bytes)</label><input type="number" id="lea_len"></div>
+                    <div><label>Data to Append</label><input type="text" id="lea_append"></div>
+                    <div><label>Hash Type</label>
+                        <select id="lea_type">
+                            <option value="md5">MD5</option>
+                            <option value="sha1">SHA-1</option>
+                            <option value="sha256">SHA-256</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="mt-10" onclick="lengthExtension()">🔧 Calculate Extension</button>
+                <div class="output-box mt-10" id="leaOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔍 Hash Lookup</h3>
+                <div class="grid-3">
+                    <a href="https://crackstation.net/" target="_blank" class="link-card">🔓 CrackStation</a>
+                    <a href="https://hashes.com/en/decrypt/hash" target="_blank" class="link-card">🔎 Hashes.com</a>
+                    <a href="https://md5decrypt.net/" target="_blank" class="link-card">🔐 MD5Decrypt</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- XOR -->
+        <div id="xor" class="panel">
+            <div class="card">
+                <h3>⊕ XOR Tool</h3>
+                <div class="grid-2">
+                    <div>
+                        <label>Input</label>
+                        <textarea id="xorIn" placeholder="Enter data..."></textarea>
+                        <label class="mt-10"><input type="checkbox" id="xorInHex"> Input is Hex</label>
+                    </div>
+                    <div>
+                        <label>Key</label>
+                        <textarea id="xorKey" placeholder="Enter key..."></textarea>
+                        <label class="mt-10"><input type="checkbox" id="xorKeyHex"> Key is Hex</label>
+                    </div>
+                </div>
+                <div class="flex-row mt-10">
+                    <button onclick="xorCalc()">XOR</button>
+                    <button class="btn-secondary" onclick="xorBrute()">Brute Single-byte</button>
+                    <button class="btn-secondary" onclick="xorRepeat()">Find Repeating Key</button>
+                </div>
+                <div class="output-box mt-10" id="xorOut"></div>
+            </div>
+        </div>
+
+        <!-- ENCODING -->
+        <div id="encoding" class="panel">
+            <div class="card">
+                <h3>📦 Multi-Encoder</h3>
+                <textarea id="encIn" placeholder="Enter text..."></textarea>
+                <div class="grid-4 mt-10">
+                    <button class="btn-small" onclick="enc('b64e')">Base64 Enc</button>
+                    <button class="btn-small" onclick="enc('b64d')">Base64 Dec</button>
+                    <button class="btn-small" onclick="enc('b32e')">Base32 Enc</button>
+                    <button class="btn-small" onclick="enc('b32d')">Base32 Dec</button>
+                    <button class="btn-small" onclick="enc('hexe')">Hex Enc</button>
+                    <button class="btn-small" onclick="enc('hexd')">Hex Dec</button>
+                    <button class="btn-small" onclick="enc('urle')">URL Enc</button>
+                    <button class="btn-small" onclick="enc('urld')">URL Dec</button>
+                    <button class="btn-small" onclick="enc('bine')">Binary Enc</button>
+                    <button class="btn-small" onclick="enc('bind')">Binary Dec</button>
+                    <button class="btn-small" onclick="enc('oct')">Octal Dec</button>
+                    <button class="btn-small" onclick="enc('rev')">Reverse</button>
+                </div>
+                <div class="output-box mt-10" id="encOut"></div>
+            </div>
+
+            <div class="card">
+                <h3>🔢 Number Converter</h3>
+                <input type="text" id="numIn" placeholder="Enter number...">
+                <div class="grid-4 mt-10">
+                    <button class="btn-small" onclick="numConv('dec')">From Dec</button>
+                    <button class="btn-small" onclick="numConv('hex')">From Hex</button>
+                    <button class="btn-small" onclick="numConv('bin')">From Bin</button>
+                    <button class="btn-small" onclick="numConv('oct')">From Oct</button>
+                </div>
+                <div class="output-box mt-10" id="numOut"></div>
+            </div>
+        </div>
+
+        <!-- REFERENCE -->
+        <div id="reference" class="panel">
+            <div class="card">
+                <h3>🔤 ASCII Table</h3>
+                <div style="overflow-x:auto">
+                    <table class="ref-table" id="asciiTable"></table>
+                </div>
+            </div>
+            <div class="card">
+                <h3>🚩 Flag Formats</h3>
+                <div class="output-box">flag{...} | FLAG{...} | CTF{...} | LKS{...} | picoCTF{...} | HTB{...}</div>
+            </div>
+            <div class="card">
+                <h3>🔗 External Tools</h3>
+                <div class="grid-3">
+                    <a href="https://gchq.github.io/CyberChef/" target="_blank" class="link-card">🍳 CyberChef</a>
+                    <a href="https://factordb.com/" target="_blank" class="link-card">🔢 FactorDB</a>
+                    <a href="https://www.dcode.fr/en" target="_blank" class="link-card">🔐 dCode</a>
+                    <a href="https://quipqiup.com/" target="_blank" class="link-card">🔤 quipqiup</a>
+                    <a href="https://www.alpertron.com.ar/ECM.HTM" target="_blank" class="link-card">🧮 Alpertron
+                        ECM</a>
+                    <a href="https://crackstation.net/" target="_blank" class="link-card">🔓 CrackStation</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        // === UTILITIES ===
+        function $(id) { return document.getElementById(id) }
+        function showToast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000) }
+        function copyText(t) { navigator.clipboard.writeText(t); showToast('Copied!') }
+        function setOut(id, v) { $(id).textContent = v }
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                $(tab.dataset.tab).classList.add('active');
+            };
+        });
+
+        // === CIPHERS ===
+        function caesar(dir) {
+            const shift = (parseInt($('caesarShift').value) * dir + 26) % 26;
+            setOut('caesarOut', $('caesarIn').value.replace(/[a-zA-Z]/g, c => {
+                const base = c <= 'Z' ? 65 : 97;
+                return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
+            }));
+        }
+        function caesarBrute() {
+            let r = ''; for (let i = 0; i < 26; i++) {
+                const s = $('caesarIn').value.replace(/[a-zA-Z]/g, c => {
+                    const base = c <= 'Z' ? 65 : 97;
+                    return String.fromCharCode((c.charCodeAt(0) - base + i) % 26 + base);
+                });
+                r += `ROT${i.toString().padStart(2, '0')}: ${s}\n`;
+            }
+            setOut('caesarOut', r);
+        }
+
+        function vigenere(dir) {
+            const text = $('vigIn').value.toUpperCase();
+            const key = $('vigKey').value.toUpperCase().replace(/[^A-Z]/g, '');
+            if (!key) { setOut('vigOut', 'Error: Need key'); return }
+            let r = '', j = 0;
+            for (let c of text) {
+                if (/[A-Z]/.test(c)) {
+                    const shift = (key.charCodeAt(j % key.length) - 65) * dir;
+                    r += String.fromCharCode((c.charCodeAt(0) - 65 + shift + 26) % 26 + 65); j++;
+                } else r += c;
+            }
+            setOut('vigOut', r);
+        }
+
+        function affine(dir) {
+            const a = parseInt($('affineA').value), b = parseInt($('affineB').value);
+            const modInv = (a, m) => { for (let x = 1; x < m; x++)if ((a * x) % m === 1) return x; return 1 };
+            const aInv = modInv(a, 26);
+            setOut('affineOut', $('affineIn').value.toUpperCase().replace(/[A-Z]/g, c => {
+                const x = c.charCodeAt(0) - 65;
+                return String.fromCharCode((dir > 0 ? (a * x + b) % 26 : (aInv * (x - b + 26)) % 26) + 65);
+            }));
+        }
+
+        function substitution(dir) {
+            const key = $('subKey').value.toUpperCase();
+            if (key.length !== 26) { setOut('subOut', 'Error: Key must be 26 letters'); return }
+            const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            setOut('subOut', $('subIn').value.toUpperCase().replace(/[A-Z]/g, c =>
+                dir > 0 ? key[alpha.indexOf(c)] : alpha[key.indexOf(c)]
+            ));
+        }
+        function subAnalysis() {
+            const text = $('subIn').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const freq = {}; for (let c of text) freq[c] = (freq[c] || 0) + 1;
+            const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+            setOut('subOut', 'Frequency Analysis:\n' + sorted.map(([c, n]) => `${c}: ${n} (${(n / text.length * 100).toFixed(1)}%)`).join('\n') + '\n\nEnglish: ETAOINSHRDLCUMWFGYPBVKJXQZ');
+        }
+
+        const MORSE = { 'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.', ' ': ' ' };
+        const MORSE_REV = Object.fromEntries(Object.entries(MORSE).map(([k, v]) => [v, k]));
+        function morse(dir) {
+            if (dir > 0) setOut('morseOut', $('morseIn').value.toUpperCase().split('').map(c => MORSE[c] || c).join(' '));
+            else setOut('morseOut', $('morseIn').value.split('   ').map(w => w.split(' ').map(c => MORSE_REV[c] || c).join('')).join(' '));
+        }
+
+        function atbash() {
+            setOut('atbashOut', $('atbashIn').value.replace(/[a-zA-Z]/g, c => {
+                const base = c <= 'Z' ? 65 : 97;
+                return String.fromCharCode(base + 25 - (c.charCodeAt(0) - base));
+            }));
+        }
+
+        // === RSA ===
+        function modPow(b, e, m) { let r = 1n; b = b % m; while (e > 0n) { if (e % 2n === 1n) r = (r * b) % m; e = e / 2n; b = (b * b) % m } return r }
+        function modInv(a, m) { let [old_r, r] = [a, m], [old_s, s] = [1n, 0n]; while (r !== 0n) { const q = old_r / r;[old_r, r] = [r, old_r - q * r];[old_s, s] = [s, old_s - q * s] } return old_s < 0n ? old_s + m : old_s }
+        function bigIntSqrt(n) { if (n < 2n) return n; let x = n, y = (x + 1n) / 2n; while (y < x) { x = y; y = (x + n / x) / 2n } return x }
+        function bigIntNthRoot(n, k) { if (n < 2n) return n; let x = n, y = (x * (k - 1n) + n / (x ** (k - 1n))) / k; while (y < x) { x = y; y = (x * (k - 1n) + n / (x ** (k - 1n))) / k } return x }
+        function toAscii(m) { let h = m.toString(16); if (h.length % 2) h = '0' + h; let r = ''; for (let i = 0; i < h.length; i += 2) { const c = parseInt(h.substr(i, 2), 16); r += (c >= 32 && c < 127) ? String.fromCharCode(c) : '.'; } return r }
+        function gcd(a, b) { while (b !== 0n) { [a, b] = [b, a % b] } return a }
+        function egcd(a, b) { if (a === 0n) return [b, 0n, 1n]; const [g, x, y] = egcd(b % a, a); return [g, y - (b / a) * x, x] }
+
+        function rsaDecrypt() {
+            try {
+                const n = BigInt($('rsa_n').value), e = BigInt($('rsa_e').value || '65537'), c = BigInt($('rsa_c').value);
+                const p = BigInt($('rsa_p').value), q = BigInt($('rsa_q').value);
+                const phi = (p - 1n) * (q - 1n), d = modInv(e, phi);
+                $('rsa_d').value = d.toString();
+                const m = modPow(c, d, n);
+                setOut('rsaOut', `m (decimal): ${m}\nm (ASCII): ${toAscii(m)}`);
+            } catch (e) { setOut('rsaOut', 'Error: ' + e.message) }
+        }
+        function rsaClear() { ['rsa_n', 'rsa_e', 'rsa_c', 'rsa_p', 'rsa_q', 'rsa_d'].forEach(id => $(id).value = ''); $('rsa_e').value = '65537'; setOut('rsaOut', ''); setOut('rsaAttackOut', '') }
+
+        function rsaAutoAttack() {
+            let results = '🚀 AUTO ATTACK RESULTS\n========================\n\n';
+            let found = false;
+            const n = $('rsa_n').value ? BigInt($('rsa_n').value) : null;
+            const c = $('rsa_c').value ? BigInt($('rsa_c').value) : null;
+            const e = BigInt($('rsa_e').value || '65537');
+
+            // 1. Small e Attack
+            if (c && e <= 7n) {
+                try {
+                    const m = bigIntNthRoot(c, e);
+                    if (m ** e === c) {
+                        results += '✅ SMALL e ATTACK SUCCESS!\n';
+                        results += `m = ${m}\nASCII: ${toAscii(m)}\n\n`;
+                        found = true;
+                    } else {
+                        results += '❌ Small e: m^e != c\n\n';
+                    }
+                } catch (err) { results += '❌ Small e: ' + err.message + '\n\n'; }
+            } else {
+                results += '⏭️ Small e: Skipped (e > 7)\n\n';
+            }
+
+            // 2. Fermat Factorization
+            if (n && !found) {
+                try {
+                    let a = bigIntSqrt(n); if (a * a < n) a++;
+                    let fermatFound = false;
+                    for (let i = 0n; i < 10000n; i++) {
+                        const b2 = a * a - n, b = bigIntSqrt(b2);
+                        if (b * b === b2) {
+                            const p = a + b, q = a - b;
+                            if (p * q === n && p !== 1n && q !== 1n) {
+                                $('rsa_p').value = p.toString();
+                                $('rsa_q').value = q.toString();
+                                results += '✅ FERMAT FACTORIZATION SUCCESS!\n';
+                                results += `p = ${p}\nq = ${q}\n\n`;
+                                fermatFound = true; found = true;
+                                break;
+                            }
+                        }
+                        a++;
+                    }
+                    if (!fermatFound) results += '❌ Fermat: No close primes (10k iter)\n\n';
+                } catch (err) { results += '❌ Fermat: ' + err.message + '\n\n'; }
+            }
+
+            // 3. Trial Division
+            if (n && !found) {
+                try {
+                    let trialFound = false;
+                    for (let i = 2n; i < 100000n; i++) {
+                        if (n % i === 0n) {
+                            $('rsa_p').value = i.toString();
+                            $('rsa_q').value = (n / i).toString();
+                            results += '✅ TRIAL DIVISION SUCCESS!\n';
+                            results += `p = ${i}\nq = ${n / i}\n\n`;
+                            trialFound = true; found = true;
+                            break;
+                        }
+                    }
+                    if (!trialFound) results += '❌ Trial: No small factors found\n\n';
+                } catch (err) { results += '❌ Trial: ' + err.message + '\n\n'; }
+            }
+
+            // Auto decrypt if factors found
+            if (found && $('rsa_p').value && $('rsa_q').value && c) {
+                try {
+                    const p = BigInt($('rsa_p').value), q = BigInt($('rsa_q').value);
+                    const phi = (p - 1n) * (q - 1n);
+                    const d = modInv(e, phi);
+                    const m = modPow(c, d, n);
+                    $('rsa_d').value = d.toString();
+                    results += '🔓 DECRYPTED MESSAGE:\n';
+                    results += `m = ${m}\nASCII: ${toAscii(m)}`;
+                } catch (err) { results += 'Decrypt error: ' + err.message; }
+            } else if (!found) {
+                results += '💡 TIP: Try FactorDB for larger numbers';
+            }
+
+            setOut('rsaAttackOut', results);
+        }
+
+        function rsaSmallE() {
+            try {
+                const c = BigInt($('rsa_c').value), e = BigInt($('rsa_e').value || '3');
+                const m = bigIntNthRoot(c, e);
+                if (m ** e === c) setOut('rsaAttackOut', `✅ Small e SUCCESS!\nm = ${m}\nASCII: ${toAscii(m)}`);
+                else setOut('rsaAttackOut', '❌ Direct root failed. m^e != c');
+            } catch (e) { setOut('rsaAttackOut', 'Error: ' + e.message) }
+        }
+
+        function rsaFermat() {
+            try {
+                const n = BigInt($('rsa_n').value);
+                let a = bigIntSqrt(n); if (a * a < n) a++;
+                for (let i = 0n; i < 100000n; i++) {
+                    const b2 = a * a - n, b = bigIntSqrt(b2);
+                    if (b * b === b2) {
+                        const p = a + b, q = a - b; if (p * q === n && p !== 1n && q !== 1n) {
+                            $('rsa_p').value = p.toString(); $('rsa_q').value = q.toString();
+                            setOut('rsaAttackOut', `✅ Fermat SUCCESS!\np = ${p}\nq = ${q}`); return;
+                        }
+                    }
+                    a++;
+                }
+                setOut('rsaAttackOut', '❌ Fermat failed after 100k iterations');
+            } catch (e) { setOut('rsaAttackOut', 'Error: ' + e.message) }
+        }
+
+        function rsaTrialDiv() {
+            try {
+                const n = BigInt($('rsa_n').value);
+                for (let i = 2n; i < 100000n; i++) {
+                    if (n % i === 0n) {
+                        $('rsa_p').value = i.toString(); $('rsa_q').value = (n / i).toString();
+                        setOut('rsaAttackOut', `✅ Factor found: ${i}\nq = ${n / i}`); return;
+                    }
+                }
+                setOut('rsaAttackOut', '❌ No small factors found');
+            } catch (e) { setOut('rsaAttackOut', 'Error: ' + e.message) }
+        }
+
+        function hastadAttack() {
+            try {
+                const n1 = BigInt($('hastad_n1').value), n2 = BigInt($('hastad_n2').value), n3 = BigInt($('hastad_n3').value);
+                const c1 = BigInt($('hastad_c1').value), c2 = BigInt($('hastad_c2').value), c3 = BigInt($('hastad_c3').value);
+                const N = n1 * n2 * n3;
+                const N1 = N / n1, N2 = N / n2, N3 = N / n3;
+                const y1 = modInv(N1, n1), y2 = modInv(N2, n2), y3 = modInv(N3, n3);
+                let x = (c1 * N1 * y1 + c2 * N2 * y2 + c3 * N3 * y3) % N;
+                if (x < 0n) x += N;
+                const m = bigIntNthRoot(x, 3n);
+                setOut('hastadOut', `CRT Result: ${x}\nCube root m = ${m}\nASCII: ${toAscii(m)}`);
+            } catch (e) { setOut('hastadOut', 'Error: ' + e.message) }
+        }
+
+        function commonModulus() {
+            try {
+                const n = BigInt($('cm_n').value);
+                const e1 = BigInt($('cm_e1').value), e2 = BigInt($('cm_e2').value);
+                const c1 = BigInt($('cm_c1').value), c2 = BigInt($('cm_c2').value);
+                let [g, s1, s2] = egcd(e1, e2);
+                if (g !== 1n) { setOut('cmOut', 'Error: e1 and e2 not coprime'); return }
+                let m;
+                if (s1 < 0n) m = (modPow(modInv(c1, n), -s1, n) * modPow(c2, s2, n)) % n;
+                else if (s2 < 0n) m = (modPow(c1, s1, n) * modPow(modInv(c2, n), -s2, n)) % n;
+                else m = (modPow(c1, s1, n) * modPow(c2, s2, n)) % n;
+                setOut('cmOut', `✅ Common Modulus SUCCESS!\nm = ${m}\nASCII: ${toAscii(m)}`);
+            } catch (e) { setOut('cmOut', 'Error: ' + e.message) }
+        }
+
+        function multiPrimeRSA() {
+            try {
+                const n = BigInt($('mp_n').value), e = BigInt($('mp_e').value || '65537'), c = BigInt($('mp_c').value);
+                const primes = $('mp_primes').value.split(',').map(p => BigInt(p.trim()));
+                let phi = 1n; for (const p of primes) phi *= (p - 1n);
+                const d = modInv(e, phi);
+                const m = modPow(c, d, n);
+                setOut('mpOut', `phi = ${phi}\nd = ${d}\nm = ${m}\nASCII: ${toAscii(m)}`);
+            } catch (e) { setOut('mpOut', 'Error: ' + e.message) }
+        }
+
+        // === PRNG ===
+        function lcgCrack() {
+            try {
+                const outputs = $('lcg_outputs').value.split(',').map(x => BigInt(x.trim()));
+                if (outputs.length < 6) { setOut('lcgOut', 'Need at least 6 outputs'); return }
+                let m = $('lcg_m').value ? BigInt($('lcg_m').value) : null;
+                if (!m) {
+                    const diffs = []; for (let i = 1; i < outputs.length; i++)diffs.push(outputs[i] - outputs[i - 1]);
+                    const zeros = []; for (let i = 2; i < diffs.length; i++)zeros.push(diffs[i] * diffs[i - 2] - diffs[i - 1] * diffs[i - 1]);
+                    m = zeros.reduce((a, b) => { const g = gcd(a < 0n ? -a : a, b < 0n ? -b : b); return g }, zeros[0]);
+                    if (m < 0n) m = -m;
+                }
+                const a = ((outputs[2] - outputs[1]) * modInv(outputs[1] - outputs[0], m)) % m;
+                const c = (outputs[1] - a * outputs[0]) % m;
+                const nextVal = (a * outputs[outputs.length - 1] + c) % m;
+                setOut('lcgOut', `m = ${m}\na = ${a}\nc = ${c}\nNext value: ${nextVal}`);
+            } catch (e) { setOut('lcgOut', 'Error: ' + e.message) }
+        }
+
+        function mtUntwist() {
+            try {
+                let outputs = $('mt_outputs').value.trim().split(/[\n,]+/).map(x => parseInt(x.trim()));
+                if (outputs.length < 624) { setOut('mtOut', `Need 624 outputs, got ${outputs.length}`); return }
+                const untemper = (y) => {
+                    y ^= (y >>> 18); y ^= ((y << 15) & 0xEFC60000) >>> 0;
+                    let t = y; for (let i = 0; i < 4; i++)t = y ^ ((t << 7) & 0x9D2C5680); y = t;
+                    t = y; for (let i = 0; i < 2; i++)t = y ^ (t >>> 11); y = t;
+                    return y >>> 0;
+                };
+                const state = outputs.slice(0, 624).map(untemper);
+                setOut('mtOut', `✅ State recovered!\nFirst 10 state values:\n${state.slice(0, 10).join('\n')}\n\n(Use this state to predict future values)`);
+            } catch (e) { setOut('mtOut', 'Error: ' + e.message) }
+        }
+
+        function lfsrAnalyze() {
+            try {
+                const bits = $('lfsr_bits').value.replace(/[^01]/g, '');
+                const taps = $('lfsr_taps').value.split(',').map(x => parseInt(x.trim()));
+                const size = Math.max(...taps);
+                let state = bits.slice(0, size).split('').map(Number);
+                let output = bits;
+                for (let i = 0; i < 20; i++) {
+                    let newBit = 0; for (const t of taps) newBit ^= state[size - t];
+                    state.shift(); state.push(newBit);
+                    output += newBit;
+                }
+                setOut('lfsrOut', `Register size: ${size}\nTaps: ${taps.join(', ')}\nExtended output: ${output}`);
+            } catch (e) { setOut('lfsrOut', 'Error: ' + e.message) }
+        }
+
+        // === AES ===
+        function aesDetect() {
+            const ct = $('aes_ct').value.replace(/\s/g, '').toLowerCase();
+            const blocks = []; for (let i = 0; i < ct.length; i += 32)blocks.push(ct.substr(i, 32));
+            const unique = new Set(blocks);
+            if (unique.size < blocks.length) setOut('aesDetectOut', `⚠️ Likely ECB mode!\nDuplicate blocks found: ${blocks.length - unique.size}\nTotal blocks: ${blocks.length}`);
+            else setOut('aesDetectOut', `Blocks: ${blocks.length}\nAll unique - likely CBC/CTR/GCM`);
+        }
+
+        function ecbAnalyze() {
+            const lines = $('ecb_blocks').value.trim().split('\n').map(l => l.trim().toLowerCase());
+            const counts = {}; lines.forEach(b => counts[b] = (counts[b] || 0) + 1);
+            const dups = Object.entries(counts).filter(([k, v]) => v > 1);
+            if (dups.length) setOut('ecbOut', `Duplicate blocks:\n${dups.map(([k, v]) => `${k}: ${v} times`).join('\n')}`);
+            else setOut('ecbOut', 'No duplicate blocks found');
+        }
+
+        function cbcBitflip() {
+            try {
+                const orig = $('cbc_orig').value.replace(/\s/g, '');
+                const target = $('cbc_target').value.replace(/\s/g, '');
+                const prev = $('cbc_prev').value.replace(/\s/g, '');
+                const xorHex = (a, b) => {
+                    let r = ''; for (let i = 0; i < a.length; i += 2) {
+                        const x = parseInt(a.substr(i, 2), 16) ^ parseInt(b.substr(i, 2), 16);
+                        r += x.toString(16).padStart(2, '0');
+                    } return r;
+                };
+                const diff = xorHex(orig, target);
+                const modified = xorHex(prev, diff);
+                setOut('cbcOut', `Original XOR Target: ${diff}\nModified prev block: ${modified}\n\nReplace the previous ciphertext block with this to change the plaintext.`);
+            } catch (e) { setOut('cbcOut', 'Error: ' + e.message) }
+        }
+
+        // === HASH ===
+        function identifyHash() {
+            const h = $('hashIn').value.trim(), len = h.length;
+            let types = [];
+            if (/^\$2[aby]?\$/.test(h)) types.push('bcrypt');
+            else if (/^\$6\$/.test(h)) types.push('SHA-512 Crypt');
+            else if (/^\$5\$/.test(h)) types.push('SHA-256 Crypt');
+            else if (/^\$1\$/.test(h)) types.push('MD5 Crypt');
+            else if (/^[a-f0-9]+$/i.test(h)) {
+                if (len === 32) types.push('MD5', 'NTLM');
+                else if (len === 40) types.push('SHA-1');
+                else if (len === 64) types.push('SHA-256');
+                else if (len === 128) types.push('SHA-512');
+            }
+            setOut('hashIdOut', types.length ? `Possible: ${types.join(', ')}` : 'Unknown hash type');
+        }
+
+        function lengthExtension() {
+            const hash = $('lea_hash').value.replace(/\s/g, '');
+            const origLen = parseInt($('lea_len').value);
+            const append = $('lea_append').value;
+            const type = $('lea_type').value;
+            const blockSize = type === 'sha512' ? 128 : 64;
+            const padLen = blockSize - ((origLen + 1 + 8) % blockSize);
+            let padding = '80'; for (let i = 0; i < padLen; i++)padding += '00';
+            padding += (origLen * 8).toString(16).padStart(16, '0');
+            const appendHex = [...append].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+            setOut('leaOut', `Original message + padding + append:\n[original ${origLen} bytes] + ${padding} + ${appendHex}\n\nNew hash state initialized from: ${hash}\nNote: Use hashpumpy or hash_extender tool for actual calculation`);
+        }
+
+        // === XOR ===
+        function hexToBytes(h) { const b = []; for (let i = 0; i < h.length; i += 2)b.push(parseInt(h.substr(i, 2), 16)); return b }
+        function strToBytes(s) { return [...s].map(c => c.charCodeAt(0)) }
+        function bytesToHex(b) { return b.map(x => x.toString(16).padStart(2, '0')).join('') }
+        function bytesToStr(b) { return b.map(x => (x >= 32 && x < 127) ? String.fromCharCode(x) : '.').join('') }
+
+        function xorCalc() {
+            let input = $('xorIn').value, key = $('xorKey').value;
+            const inBytes = $('xorInHex').checked ? hexToBytes(input.replace(/\s/g, '')) : strToBytes(input);
+            const keyBytes = $('xorKeyHex').checked ? hexToBytes(key.replace(/\s/g, '')) : strToBytes(key);
+            if (!keyBytes.length) { setOut('xorOut', 'Error: Need key'); return }
+            const result = inBytes.map((b, i) => b ^ keyBytes[i % keyBytes.length]);
+            setOut('xorOut', `Hex: ${bytesToHex(result)}\nASCII: ${bytesToStr(result)}`);
+        }
+
+        function xorBrute() {
+            let input = $('xorIn').value;
+            const inBytes = $('xorInHex').checked ? hexToBytes(input.replace(/\s/g, '')) : strToBytes(input);
+            let results = '';
+            for (let k = 0; k < 256; k++) {
+                const r = inBytes.map(b => b ^ k);
+                const s = bytesToStr(r);
+                if (/flag|ctf|lks|key|pass/i.test(s)) results += `Key 0x${k.toString(16).padStart(2, '0')}: ${s}\n`;
+            }
+            setOut('xorOut', results || 'No obvious flags found');
+        }
+
+        function xorRepeat() {
+            setOut('xorOut', 'Hint: Use Hamming distance to find key length.\n1. Split ciphertext into blocks of size N\n2. XOR consecutive blocks\n3. Count 1-bits (Hamming distance)\n4. Normalize by N\n5. Lowest value = likely key length');
+        }
+
+        // === ENCODING ===
+        const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        function b32e(s) { let bits = '', out = ''; for (let c of s) bits += c.charCodeAt(0).toString(2).padStart(8, '0'); while (bits.length % 5) bits += '0'; for (let i = 0; i < bits.length; i += 5)out += B32[parseInt(bits.substr(i, 5), 2)]; while (out.length % 8) out += '='; return out }
+        function b32d(s) { s = s.replace(/=+$/, '').toUpperCase(); let bits = ''; for (let c of s) bits += B32.indexOf(c).toString(2).padStart(5, '0'); let out = ''; for (let i = 0; i + 8 <= bits.length; i += 8)out += String.fromCharCode(parseInt(bits.substr(i, 8), 2)); return out }
+
+        function enc(op) {
+            const input = $('encIn').value; let output = '';
+            try {
+                switch (op) {
+                    case 'b64e': output = btoa(input); break;
+                    case 'b64d': output = atob(input); break;
+                    case 'b32e': output = b32e(input); break;
+                    case 'b32d': output = b32d(input); break;
+                    case 'hexe': output = [...input].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' '); break;
+                    case 'hexd': output = input.replace(/\s/g, '').match(/.{2}/g).map(h => String.fromCharCode(parseInt(h, 16))).join(''); break;
+                    case 'urle': output = encodeURIComponent(input); break;
+                    case 'urld': output = decodeURIComponent(input); break;
+                    case 'bine': output = [...input].map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' '); break;
+                    case 'bind': output = input.replace(/\s/g, '').match(/.{8}/g).map(b => String.fromCharCode(parseInt(b, 2))).join(''); break;
+                    case 'oct': output = input.split(/\s+/).map(o => String.fromCharCode(parseInt(o, 8))).join(''); break;
+                    case 'rev': output = [...input].reverse().join(''); break;
+                }
+            } catch (e) { output = 'Error: ' + e.message }
+            setOut('encOut', output);
+        }
+
+        function numConv(from) {
+            const input = $('numIn').value.trim();
+            try {
+                let num;
+                switch (from) {
+                    case 'dec': num = parseInt(input, 10); break;
+                    case 'hex': num = parseInt(input, 16); break;
+                    case 'bin': num = parseInt(input, 2); break;
+                    case 'oct': num = parseInt(input, 8); break;
+                }
+                $('numOut').innerHTML = `Dec: ${num}<br>Hex: ${num.toString(16)}<br>Bin: ${num.toString(2)}<br>Oct: ${num.toString(8)}<br>ASCII: ${num >= 32 && num < 127 ? String.fromCharCode(num) : 'N/A'}`;
+            } catch (e) { $('numOut').textContent = 'Error' }
+        }
+
+        // ASCII Table
+        (function () {
+            let html = '<tr><th>Dec</th><th>Hex</th><th>Char</th><th>Dec</th><th>Hex</th><th>Char</th><th>Dec</th><th>Hex</th><th>Char</th></tr>';
+            for (let i = 32; i < 64; i++) {
+                html += `<tr>`;
+                for (let j = 0; j < 3; j++) {
+                    const c = i + j * 32;
+                    if (c < 127) html += `<td>${c}</td><td>${c.toString(16)}</td><td><code>${String.fromCharCode(c)}</code></td>`;
+                }
+                html += `</tr>`;
+            }
+            $('asciiTable').innerHTML = html;
+        })();
+    </script>
+    <footer
+        style="text-align:center;padding:30px 20px;margin-top:40px;border-top:1px solid #333;color:#888;font-size:.9rem">
+        Made with &#10084; by <strong><a href="https://jovian.my.id" target="_blank"
+                style="color:#00d9ff">Jovian</a></strong> |
+        <a href="https://github.com/vian0001" target="_blank" style="color:#888">GitHub</a>
+    </footer>
+</body>
+
+</html>

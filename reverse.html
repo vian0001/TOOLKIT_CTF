@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Reverse Engineering Toolkit</title>
+    <style>
+        :root {
+            --bg: #0f0f23;
+            --bg2: #1a1a2e;
+            --bg3: #16213e;
+            --accent: #a855f7;
+            --accent2: #c084fc;
+            --text: #e0e0e0;
+            --text2: #888;
+            --success: #00ff88;
+            --border: #333
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0
+        }
+
+        header h1 {
+            font-size: 1.8rem
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--bg2);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: .9rem
+        }
+
+        .tab:hover {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 15px
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: monospace
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        button:hover {
+            background: var(--accent2)
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: .85rem
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px
+        }
+
+        .output-box {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            min-height: 60px;
+            white-space: pre-wrap
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s;
+            z-index: 1000
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .mt-10 {
+            margin-top: 10px
+        }
+
+        .mb-10 {
+            margin-bottom: 10px
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem
+        }
+
+        .ref-table th,
+        .ref-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .ref-table th {
+            color: var(--accent)
+        }
+
+        .ref-table code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--success)
+        }
+
+        .link-card {
+            display: block;
+            padding: 15px;
+            background: var(--bg3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid transparent;
+            margin: 5px 0
+        }
+
+        .link-card:hover {
+            border-color: var(--accent)
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>LKS Reverse Engineering Toolkit <span class="badge">v2.0</span></h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('asm')">Assembly</button>
+            <button class="tab" onclick="showTab('elf')">ELF Analysis</button>
+            <button class="tab" onclick="showTab('deobf')">Deobfuscation</button>
+            <button class="tab" onclick="showTab('android')">Android</button>
+            <button class="tab" onclick="showTab('tools')">Tools</button>
+            <button class="tab" onclick="showTab('commands')">Commands</button>
+        </div>
+
+        <div id="asm" class="panel active">
+            <div class="card">
+                <h3>x86/x64 Register Reference</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>64-bit</th>
+                        <th>32-bit</th>
+                        <th>16-bit</th>
+                        <th>8-bit</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><code>rax</code></td>
+                        <td><code>eax</code></td>
+                        <td><code>ax</code></td>
+                        <td><code>al</code></td>
+                        <td>Return value, syscall number</td>
+                    </tr>
+                    <tr>
+                        <td><code>rbx</code></td>
+                        <td><code>ebx</code></td>
+                        <td><code>bx</code></td>
+                        <td><code>bl</code></td>
+                        <td>Base pointer (preserved)</td>
+                    </tr>
+                    <tr>
+                        <td><code>rcx</code></td>
+                        <td><code>ecx</code></td>
+                        <td><code>cx</code></td>
+                        <td><code>cl</code></td>
+                        <td>Counter, 4th arg (Windows)</td>
+                    </tr>
+                    <tr>
+                        <td><code>rdx</code></td>
+                        <td><code>edx</code></td>
+                        <td><code>dx</code></td>
+                        <td><code>dl</code></td>
+                        <td>3rd arg, I/O port</td>
+                    </tr>
+                    <tr>
+                        <td><code>rsi</code></td>
+                        <td><code>esi</code></td>
+                        <td><code>si</code></td>
+                        <td><code>sil</code></td>
+                        <td>2nd arg, source index</td>
+                    </tr>
+                    <tr>
+                        <td><code>rdi</code></td>
+                        <td><code>edi</code></td>
+                        <td><code>di</code></td>
+                        <td><code>dil</code></td>
+                        <td>1st arg, destination index</td>
+                    </tr>
+                    <tr>
+                        <td><code>rbp</code></td>
+                        <td><code>ebp</code></td>
+                        <td><code>bp</code></td>
+                        <td><code>bpl</code></td>
+                        <td>Base/frame pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>rsp</code></td>
+                        <td><code>esp</code></td>
+                        <td><code>sp</code></td>
+                        <td><code>spl</code></td>
+                        <td>Stack pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>rip</code></td>
+                        <td><code>eip</code></td>
+                        <td><code>ip</code></td>
+                        <td>-</td>
+                        <td>Instruction pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>r8-r15</code></td>
+                        <td><code>r8d-r15d</code></td>
+                        <td><code>r8w-r15w</code></td>
+                        <td><code>r8b-r15b</code></td>
+                        <td>Additional registers</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Calling Conventions</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Convention</th>
+                        <th>Args Order</th>
+                        <th>Return</th>
+                    </tr>
+                    <tr>
+                        <td>Linux x64 (System V)</td>
+                        <td><code>rdi, rsi, rdx, rcx, r8, r9</code></td>
+                        <td><code>rax</code></td>
+                    </tr>
+                    <tr>
+                        <td>Windows x64</td>
+                        <td><code>rcx, rdx, r8, r9</code></td>
+                        <td><code>rax</code></td>
+                    </tr>
+                    <tr>
+                        <td>Linux x86 (cdecl)</td>
+                        <td><code>stack (right to left)</code></td>
+                        <td><code>eax</code></td>
+                    </tr>
+                    <tr>
+                        <td>Linux syscall x64</td>
+                        <td><code>rdi, rsi, rdx, r10, r8, r9</code></td>
+                        <td><code>rax</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Common Instructions</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Instruction</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>mov dst, src</code></td>
+                        <td>Copy src to dst</td>
+                    </tr>
+                    <tr>
+                        <td><code>lea dst, [addr]</code></td>
+                        <td>Load effective address</td>
+                    </tr>
+                    <tr>
+                        <td><code>push/pop</code></td>
+                        <td>Stack operations</td>
+                    </tr>
+                    <tr>
+                        <td><code>call/ret</code></td>
+                        <td>Function call/return</td>
+                    </tr>
+                    <tr>
+                        <td><code>jmp/je/jne/jl/jg</code></td>
+                        <td>Jumps (unconditional/conditional)</td>
+                    </tr>
+                    <tr>
+                        <td><code>cmp a, b</code></td>
+                        <td>Compare (sets flags)</td>
+                    </tr>
+                    <tr>
+                        <td><code>test a, b</code></td>
+                        <td>Bitwise AND (sets flags)</td>
+                    </tr>
+                    <tr>
+                        <td><code>xor a, a</code></td>
+                        <td>Zero register</td>
+                    </tr>
+                    <tr>
+                        <td><code>nop</code></td>
+                        <td>No operation</td>
+                    </tr>
+                    <tr>
+                        <td><code>syscall/int 0x80</code></td>
+                        <td>System call</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Assembly Converter</h3>
+                <textarea id="asmIn" placeholder="Enter hex bytes: 48 89 e5 or assembly"></textarea>
+                <div class="flex-row mt-10">
+                    <button onclick="hexToAsm()">Hex to ASM (hint)</button>
+                    <button class="btn-secondary" onclick="clearAsm()">Clear</button>
+                </div>
+                <div class="output-box mt-10" id="asmOut"></div>
+            </div>
+        </div>
+
+        <div id="elf" class="panel">
+            <div class="card">
+                <h3>ELF Header Structure</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Offset</th>
+                        <th>Field</th>
+                        <th>Size</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>0x00</td>
+                        <td><code>e_ident</code></td>
+                        <td>16</td>
+                        <td>Magic: 7F 45 4C 46 (ELF)</td>
+                    </tr>
+                    <tr>
+                        <td>0x10</td>
+                        <td><code>e_type</code></td>
+                        <td>2</td>
+                        <td>1=REL, 2=EXEC, 3=DYN</td>
+                    </tr>
+                    <tr>
+                        <td>0x12</td>
+                        <td><code>e_machine</code></td>
+                        <td>2</td>
+                        <td>3=x86, 0x3E=x64</td>
+                    </tr>
+                    <tr>
+                        <td>0x18</td>
+                        <td><code>e_entry</code></td>
+                        <td>8</td>
+                        <td>Entry point address</td>
+                    </tr>
+                    <tr>
+                        <td>0x20</td>
+                        <td><code>e_phoff</code></td>
+                        <td>8</td>
+                        <td>Program header offset</td>
+                    </tr>
+                    <tr>
+                        <td>0x28</td>
+                        <td><code>e_shoff</code></td>
+                        <td>8</td>
+                        <td>Section header offset</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Common Sections</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Section</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>.text</code></td>
+                        <td>Executable code</td>
+                    </tr>
+                    <tr>
+                        <td><code>.data</code></td>
+                        <td>Initialized data</td>
+                    </tr>
+                    <tr>
+                        <td><code>.bss</code></td>
+                        <td>Uninitialized data</td>
+                    </tr>
+                    <tr>
+                        <td><code>.rodata</code></td>
+                        <td>Read-only data (strings)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.plt/.got</code></td>
+                        <td>Dynamic linking</td>
+                    </tr>
+                    <tr>
+                        <td><code>.symtab</code></td>
+                        <td>Symbol table</td>
+                    </tr>
+                    <tr>
+                        <td><code>.strtab</code></td>
+                        <td>String table</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Security Protections</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Protection</th>
+                        <th>Check</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>NX/DEP</td>
+                        <td><code>readelf -l | grep GNU_STACK</code></td>
+                        <td>Non-executable stack</td>
+                    </tr>
+                    <tr>
+                        <td>CANARY</td>
+                        <td><code>checksec binary</code></td>
+                        <td>Stack canary protection</td>
+                    </tr>
+                    <tr>
+                        <td>PIE</td>
+                        <td><code>file binary</code></td>
+                        <td>Position Independent Executable</td>
+                    </tr>
+                    <tr>
+                        <td>RELRO</td>
+                        <td><code>checksec binary</code></td>
+                        <td>Relocation Read-Only</td>
+                    </tr>
+                    <tr>
+                        <td>ASLR</td>
+                        <td><code>cat /proc/sys/kernel/randomize_va_space</code></td>
+                        <td>Address Space Layout Randomization</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="deobf" class="panel">
+            <div class="card">
+                <h3>XOR Decoder</h3>
+                <div class="grid-2">
+                    <div><label>Encrypted (hex)</label><input type="text" id="xorData" placeholder="48 65 6c 6c 6f">
+                    </div>
+                    <div><label>Key (hex or text)</label><input type="text" id="xorKey" placeholder="41 or A"></div>
+                </div>
+                <button class="mt-10" onclick="xorDecode()">Decode</button>
+                <div class="output-box mt-10" id="xorOut"></div>
+            </div>
+            <div class="card">
+                <h3>Base Converter</h3>
+                <div class="grid-2">
+                    <div><label>Input</label><input type="text" id="baseIn" placeholder="0x41424344 or 1094861636">
+                    </div>
+                    <div><label>From Base</label><select id="baseFrom">
+                            <option value="16">Hex</option>
+                            <option value="10">Decimal</option>
+                            <option value="8">Octal</option>
+                            <option value="2">Binary</option>
+                        </select></div>
+                </div>
+                <button class="mt-10" onclick="convertBase()">Convert All</button>
+                <div class="output-box mt-10" id="baseOut"></div>
+            </div>
+            <div class="card">
+                <h3>String Deobfuscation Patterns</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td>XOR single byte</td>
+                        <td><code>for(i=0;i&lt;len;i++) s[i]^=key;</code></td>
+                    </tr>
+                    <tr>
+                        <td>XOR key array</td>
+                        <td><code>s[i]^=key[i%keylen];</code></td>
+                    </tr>
+                    <tr>
+                        <td>ROT/Caesar</td>
+                        <td><code>s[i]=(s[i]-'a'+n)%26+'a';</code></td>
+                    </tr>
+                    <tr>
+                        <td>Base64 + XOR</td>
+                        <td>Decode base64 first, then XOR</td>
+                    </tr>
+                    <tr>
+                        <td>Stack strings</td>
+                        <td><code>mov [rbp-8], 0x6c6c6548</code></td>
+                    </tr>
+                    <tr>
+                        <td>Anti-debug</td>
+                        <td><code>ptrace(PTRACE_TRACEME)</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="android" class="panel">
+            <div class="card">
+                <h3>APK Analysis</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Task</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>Unpack APK</td>
+                        <td><code>apktool d app.apk</code></td>
+                    </tr>
+                    <tr>
+                        <td>Repack APK</td>
+                        <td><code>apktool b folder -o new.apk</code></td>
+                    </tr>
+                    <tr>
+                        <td>Sign APK</td>
+                        <td><code>jarsigner -keystore key.jks new.apk alias</code></td>
+                    </tr>
+                    <tr>
+                        <td>Decompile</td>
+                        <td><code>jadx -d out app.apk</code></td>
+                    </tr>
+                    <tr>
+                        <td>Convert DEX</td>
+                        <td><code>d2j-dex2jar app.apk</code></td>
+                    </tr>
+                    <tr>
+                        <td>View manifest</td>
+                        <td><code>aapt dump badging app.apk</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Smali Reference</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Smali</th>
+                    </tr>
+                    <tr>
+                        <td>void</td>
+                        <td><code>V</code></td>
+                    </tr>
+                    <tr>
+                        <td>int</td>
+                        <td><code>I</code></td>
+                    </tr>
+                    <tr>
+                        <td>boolean</td>
+                        <td><code>Z</code></td>
+                    </tr>
+                    <tr>
+                        <td>String</td>
+                        <td><code>Ljava/lang/String;</code></td>
+                    </tr>
+                    <tr>
+                        <td>array</td>
+                        <td><code>[I</code> (int[]), <code>[Ljava/lang/String;</code></td>
+                    </tr>
+                    <tr>
+                        <td>method call</td>
+                        <td><code>invoke-virtual {p0}, Lclass;->method()V</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Frida Hooks</h3>
+                <textarea id="fridaOut" readonly style="min-height:150px">// Hook function
+Java.perform(function() {
+    var cls = Java.use("com.example.MainActivity");
+    cls.checkFlag.implementation = function(s) {
+        console.log("Input: " + s);
+        var result = this.checkFlag(s);
+        console.log("Result: " + result);
+        return result;
+    };
+});</textarea>
+                <button class="mt-10" onclick="copyFrida()">Copy Template</button>
+            </div>
+        </div>
+
+        <div id="tools" class="panel">
+            <div class="card">
+                <h3>Essential RE Tools</h3>
+                <div class="grid-3">
+                    <a href="https://ghidra-sre.org/" target="_blank" class="link-card">Ghidra (NSA)</a>
+                    <a href="https://hex-rays.com/ida-free/" target="_blank" class="link-card">IDA Free</a>
+                    <a href="https://binary.ninja/" target="_blank" class="link-card">Binary Ninja</a>
+                    <a href="https://cutter.re/" target="_blank" class="link-card">Cutter (radare2)</a>
+                    <a href="https://dogbolt.org/" target="_blank" class="link-card">Dogbolt (Online)</a>
+                    <a href="https://onlinedisassembler.com/" target="_blank" class="link-card">ODA Online</a>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Android Tools</h3>
+                <div class="grid-3">
+                    <a href="https://ibotpeaches.github.io/Apktool/" target="_blank" class="link-card">APKTool</a>
+                    <a href="https://github.com/skylot/jadx" target="_blank" class="link-card">JADX</a>
+                    <a href="https://frida.re/" target="_blank" class="link-card">Frida</a>
+                    <a href="https://github.com/pxb1988/dex2jar" target="_blank" class="link-card">dex2jar</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="commands" class="panel">
+            <div class="card">
+                <h3>GDB Commands</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>gdb ./binary</code></td>
+                        <td>Start GDB</td>
+                    </tr>
+                    <tr>
+                        <td><code>r / run</code></td>
+                        <td>Run program</td>
+                    </tr>
+                    <tr>
+                        <td><code>b *0x401234</code></td>
+                        <td>Set breakpoint</td>
+                    </tr>
+                    <tr>
+                        <td><code>b main</code></td>
+                        <td>Break at function</td>
+                    </tr>
+                    <tr>
+                        <td><code>c / continue</code></td>
+                        <td>Continue execution</td>
+                    </tr>
+                    <tr>
+                        <td><code>ni / si</code></td>
+                        <td>Next/step instruction</td>
+                    </tr>
+                    <tr>
+                        <td><code>x/20x $rsp</code></td>
+                        <td>Examine memory</td>
+                    </tr>
+                    <tr>
+                        <td><code>x/s 0x402000</code></td>
+                        <td>Print string</td>
+                    </tr>
+                    <tr>
+                        <td><code>info registers</code></td>
+                        <td>Show registers</td>
+                    </tr>
+                    <tr>
+                        <td><code>disas main</code></td>
+                        <td>Disassemble function</td>
+                    </tr>
+                    <tr>
+                        <td><code>set $rax=0</code></td>
+                        <td>Modify register</td>
+                    </tr>
+                    <tr>
+                        <td><code>vmmap</code></td>
+                        <td>Memory map (pwndbg)</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Analysis Commands</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Task</th>
+                        <th>Command</th>
+                    </tr>
+                    <tr>
+                        <td>File type</td>
+                        <td><code>file binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Strings</td>
+                        <td><code>strings binary | grep -i flag</code></td>
+                    </tr>
+                    <tr>
+                        <td>Security</td>
+                        <td><code>checksec binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Symbols</td>
+                        <td><code>nm binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Dynamic libs</td>
+                        <td><code>ldd binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Headers</td>
+                        <td><code>readelf -h binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Sections</td>
+                        <td><code>readelf -S binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hex dump</td>
+                        <td><code>xxd binary | head</code></td>
+                    </tr>
+                    <tr>
+                        <td>Disassemble</td>
+                        <td><code>objdump -d binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Trace syscalls</td>
+                        <td><code>strace ./binary</code></td>
+                    </tr>
+                    <tr>
+                        <td>Library calls</td>
+                        <td><code>ltrace ./binary</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast">Copied!</div>
+    <footer
+        style="text-align:center;padding:30px 20px;margin-top:40px;border-top:1px solid #333;color:#888;font-size:.9rem">
+        Made with &#10084; by <strong><a href="https://jovian.my.id" target="_blank"
+                style="color:#a855f7">Jovian</a></strong> |
+        <a href="https://github.com/vian0001" target="_blank" style="color:#888">GitHub</a>
+    </footer>
+
+    <script>
+        function $(id) { return document.getElementById(id) }
+        function showToast(m) { var t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 2000) }
+        function copy(t) { navigator.clipboard.writeText(t); showToast('Copied!') }
+        function setOut(id, v) { $(id).textContent = v }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active') });
+            document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active') });
+            event.target.classList.add('active');
+            $(name).classList.add('active');
+        }
+
+        function hexToAsm() {
+            var hex = $('asmIn').value.replace(/\s/g, '').toLowerCase();
+            var out = 'Common patterns:\n';
+            if (hex.includes('4889e5')) out += 'mov rbp, rsp (function prologue)\n';
+            if (hex.includes('4883ec')) out += 'sub rsp, N (stack allocation)\n';
+            if (hex.includes('c3')) out += 'ret (return)\n';
+            if (hex.includes('90')) out += 'nop\n';
+            if (hex.includes('0f05')) out += 'syscall\n';
+            if (hex.includes('cd80')) out += 'int 0x80 (32-bit syscall)\n';
+            if (hex.includes('e8')) out += 'call (relative)\n';
+            if (hex.includes('ff')) out += 'indirect call/jmp\n';
+            out += '\nUse Ghidra/IDA for full disassembly\nor: https://onlinedisassembler.com/';
+            setOut('asmOut', out);
+        }
+
+        function clearAsm() { $('asmIn').value = ''; setOut('asmOut', ''); }
+
+        function xorDecode() {
+            var data = $('xorData').value.replace(/\s/g, '');
+            var keyIn = $('xorKey').value.trim();
+            var key = [];
+            if (keyIn.match(/^[0-9a-fA-F\s]+$/)) {
+                keyIn.replace(/\s/g, '').match(/.{2}/g).forEach(function (h) { key.push(parseInt(h, 16)) });
+            } else {
+                for (var i = 0; i < keyIn.length; i++)key.push(keyIn.charCodeAt(i));
+            }
+            if (key.length === 0) key = [0];
+            var bytes = data.match(/.{2}/g) || [];
+            var out = 'Hex: ';
+            var ascii = 'ASCII: ';
+            for (var i = 0; i < bytes.length; i++) {
+                var b = parseInt(bytes[i], 16) ^ key[i % key.length];
+                out += b.toString(16).padStart(2, '0') + ' ';
+                ascii += (b >= 32 && b < 127) ? String.fromCharCode(b) : '.';
+            }
+            setOut('xorOut', out + '\n' + ascii);
+        }
+
+        function convertBase() {
+            var input = $('baseIn').value.trim();
+            var base = parseInt($('baseFrom').value);
+            var num;
+            if (input.startsWith('0x')) num = parseInt(input, 16);
+            else if (input.startsWith('0b')) num = parseInt(input.slice(2), 2);
+            else if (input.startsWith('0o')) num = parseInt(input.slice(2), 8);
+            else num = parseInt(input, base);
+            if (isNaN(num)) { setOut('baseOut', 'Invalid input'); return }
+            var out = 'Decimal: ' + num + '\n';
+            out += 'Hex: 0x' + num.toString(16) + '\n';
+            out += 'Binary: 0b' + num.toString(2) + '\n';
+            out += 'Octal: 0o' + num.toString(8) + '\n';
+            var bytes = [];
+            var n = num;
+            while (n > 0) { bytes.unshift(n & 0xff); n = n >>> 8 }
+            var ascii = '';
+            bytes.forEach(function (b) { ascii += (b >= 32 && b < 127) ? String.fromCharCode(b) : '.' });
+            out += 'ASCII: ' + ascii;
+            setOut('baseOut', out);
+        }
+
+        function copyFrida() { copy($('fridaOut').value) }
+    </script>
+</body>
+
+</html>

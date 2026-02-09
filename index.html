@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS CTF Toolkit</title>
+    <style>
+        :root {
+            --bg: #0a0f1a;
+            --bg2: #111827;
+            --accent: #00d9ff;
+            --accent2: #f59e0b;
+            --text: #f3f4f6;
+            --text2: #9ca3af
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .subtitle {
+            color: var(--text2);
+            margin-bottom: 40px;
+            font-size: 1.1rem
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent2);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: .8rem;
+            font-weight: 700;
+            margin-left: 10px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 30px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all .3s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.2)
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2))
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 10px
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: .9rem
+        }
+
+        .card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px
+        }
+
+        .features {
+            margin-top: 10px;
+            font-size: .8rem;
+            color: var(--accent)
+        }
+
+        footer {
+            margin-top: 50px;
+            color: var(--text2);
+            font-size: .85rem
+        }
+
+        footer a {
+            color: var(--accent)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LKS CTF Toolkit <span class="badge">v2.0 PRO</span></h1>
+        <p class="subtitle">Cyber Security Red Team Competition Tools</p>
+
+        <div class="grid">
+            <a href="crypto.html" class="card">
+                <div class="icon">&#128272;</div>
+                <h2>Cryptography</h2>
+                <p>Classical ciphers, RSA attacks, PRNG crackers, AES modes, hash tools</p>
+                <div class="features">RSA | LCG | MT19937 | AES | XOR</div>
+            </a>
+
+            <a href="website.html" class="card">
+                <div class="icon">&#127760;</div>
+                <h2>Web Exploitation</h2>
+                <p>SQLi, XSS, SSTI, SSRF, LFI, file upload, IDOR, session bypass</p>
+                <div class="features">SQLi | XSS | SSTI | SSRF | RCE</div>
+            </a>
+
+            <a href="forensic.html" class="card">
+                <div class="icon">&#128269;</div>
+                <h2>Forensics</h2>
+                <p>File analysis, steganography, metadata extraction, hex viewer</p>
+                <div class="features">Stego | Hex | Strings | Binwalk</div>
+            </a>
+
+            <a href="reverse.html" class="card">
+                <div class="icon">&#128736;</div>
+                <h2>Reverse Engineering</h2>
+                <p>x86/x64 assembly, ELF analysis, deobfuscation, Android RE</p>
+                <div class="features">ASM | GDB | Ghidra | APK</div>
+            </a>
+
+            <a href="binary.html" class="card">
+                <div class="icon">&#128163;</div>
+                <h2>Binary Exploitation</h2>
+                <p>Buffer overflow, format string, ROP chain, shellcode, pwntools</p>
+                <div class="features">BOF | ROP | ret2libc | fmt</div>
+            </a>
+        </div>
+
+        <footer>
+            <p>Good luck! Find those flags!</p>
+            <p style="margin-top:10px">Quick links: <a href="https://gchq.github.io/CyberChef/"
+                    target="_blank">CyberChef</a> | <a href="https://factordb.com/" target="_blank">FactorDB</a> | <a
+                    href="https://crackstation.net/" target="_blank">CrackStation</a> | <a
+                    href="https://www.aperisolve.com/" target="_blank">Aperi'Solve</a></p>
+            <p style="margin-top:20px;padding-top:15px;border-top:1px solid #333">
+                Made with &#10084; by <strong><a href="https://jovian.my.id" target="_blank"
+                        style="color:var(--accent)">Jovian</a></strong> |
+                <a href="https://github.com/vian0001" target="_blank" style="color:var(--text2)">GitHub</a>
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>

