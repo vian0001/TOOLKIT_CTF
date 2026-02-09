@@ -81,7 +81,7 @@ LKS-CTF-Toolkit/
 
 1. Clone repository ini:
 ```bash
-git clone https://github.com/vian0001/LKS-CTF-Toolkit.git
+git clone https://github.com/vian0001/TOOLKIT_CTF.git
 ```
 
 2. Buka `index.html` di browser:
@@ -155,3 +155,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
   Made with ❤️ for LKS Cyber Security Competition<br>
   Good luck finding those flags! 🚩
 </p>
+
