@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Fast PCAP file reader and analyzer - Analyze Wireshark capture files directly in your browser">
+    <title>SharkLens — Fast PCAP Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+                    <path d="M16 2L4 8v16l12 6 12-6V8L16 2z" fill="url(#logoGrad)" opacity="0.9" />
+                    <path d="M16 2L4 8l12 6 12-6L16 2z" fill="url(#logoGrad2)" opacity="0.7" />
+                    <path d="M16 14v16l12-6V8L16 14z" fill="url(#logoGrad3)" opacity="0.5" />
+                    <circle cx="16" cy="14" r="3" fill="#fff" opacity="0.9" />
+                    <defs>
+                        <linearGradient id="logoGrad" x1="4" y1="2" x2="28" y2="30">
+                            <stop stop-color="#00d4ff" />
+                            <stop offset="1" stop-color="#7c3aed" />
+                        </linearGradient>
+                        <linearGradient id="logoGrad2" x1="4" y1="2" x2="28" y2="14">
+                            <stop stop-color="#00d4ff" />
+                            <stop offset="1" stop-color="#06b6d4" />
+                        </linearGradient>
+                        <linearGradient id="logoGrad3" x1="16" y1="8" x2="28" y2="30">
+                            <stop stop-color="#7c3aed" />
+                            <stop offset="1" stop-color="#a855f7" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">SharkLens</span>
+            </div>
+        </div>
+        <div class="header-center" id="fileInfo" style="display:none;">
+            <span class="file-badge" id="fileName"></span>
+            <span class="file-meta" id="fileMeta"></span>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-ghost" id="btnExport" style="display:none;" title="Export to CSV">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 11v3h12v-3M8 2v9M4 7l4 4 4-4" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Export CSV
+            </button>
+            <button class="btn btn-primary" id="btnOpen">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4h5l2 2h5v8H2V4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                Open File
+            </button>
+            <input type="file" id="fileInput" accept=".pcap,.pcapng,.cap" style="display:none">
+        </div>
+    </header>
+
+    <!-- Drop Zone / Welcome Screen -->
+    <main class="main" id="mainContent">
+        <div class="dropzone" id="dropZone">
+            <div class="dropzone-content">
+                <div class="dropzone-icon">
+                    <svg viewBox="0 0 80 80" fill="none">
+                        <rect x="10" y="20" width="60" height="45" rx="6" stroke="url(#dzGrad)" stroke-width="2"
+                            stroke-dasharray="6 3" opacity="0.6" />
+                        <path d="M40 30v20M30 40h20" stroke="url(#dzGrad)" stroke-width="2.5" stroke-linecap="round" />
+                        <circle cx="40" cy="40" r="18" stroke="url(#dzGrad)" stroke-width="1.5" opacity="0.3" />
+                        <defs>
+                            <linearGradient id="dzGrad" x1="10" y1="20" x2="70" y2="65">
+                                <stop stop-color="#00d4ff" />
+                                <stop offset="1" stop-color="#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2 class="dropzone-title">Drop PCAP file here</h2>
+                <div id="fileError"
+                    style="display:none; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 500; border: 1px solid rgba(239, 68, 68, 0.3); text-align: left;">
+                </div>
+                <p class="dropzone-subtitle">or click <strong>Open File</strong> to browse</p>
+                <div class="dropzone-formats">
+                    <span class="format-tag">.pcap</span>
+                    <span class="format-tag">.pcapng</span>
+                    <span class="format-tag">.cap</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState" style="display:none;">
+            <div class="spinner"></div>
+            <p class="loading-text" id="loadingText">Parsing packets...</p>
+        </div>
+
+        <!-- Dashboard (hidden until file loaded) -->
+        <div class="dashboard" id="dashboard" style="display:none;">
+            <!-- Stats Cards -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-packets">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <rect x="2" y="2" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M6 7h8M6 10h6M6 13h4" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statTotalPackets">0</span>
+                        <span class="stat-label">Total Packets</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-size">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2v16M6 14l4 4 4-4M6 6l4-4 4 4" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statFileSize">0 B</span>
+                        <span class="stat-label">File Size</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-duration">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M10 5v5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statDuration">0s</span>
+                        <span class="stat-label">Duration</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-protocols">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 10a7 7 0 1114 0 7 7 0 01-14 0z" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M10 3v7l5 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statProtocols">0</span>
+                        <span class="stat-label">Protocols</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-ips">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <circle cx="10" cy="5" r="3" stroke="currentColor" stroke-width="1.5" />
+                            <circle cx="5" cy="15" r="3" stroke="currentColor" stroke-width="1.5" />
+                            <circle cx="15" cy="15" r="3" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M10 8v2M7 13l-1 1M13 13l1 1" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statUniqueIPs">0</span>
+                        <span class="stat-label">Unique IPs</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                    <input type="text" id="searchInput"
+                        placeholder="Filter: ip.addr==192.168.1.1 || protocol==TCP || any keyword..."
+                        class="search-input">
+                </div>
+                <div class="filter-chips" id="protocolChips">
+                    <!-- Populated dynamically -->
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-sm btn-ghost" id="btnClearFilter">Clear</button>
+                    <span class="filter-count" id="filterCount"></span>
+                </div>
+            </div>
+
+            <!-- 🚩 CTF Toolkit Bar -->
+            <div class="ctf-toolbar">
+                <div class="ctf-toolbar-top">
+                    <div class="ctf-toolbar-label">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 2h3v6H3zM8 2l5 3-5 3V2z" fill="currentColor" />
+                            <path d="M3 12h10M3 14h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                        CTF Toolkit
+                    </div>
+                    <button class="ctf-toggle open" id="ctfToggle" title="Show/Hide CTF Toolkit">
+                        <span class="ctf-toggle-icon">▲</span> Hide
+                    </button>
+                </div>
+                <div class="ctf-collapsible open" id="ctfCollapsible">
+                    <div class="ctf-flag-format">
+                        <label class="ctf-flag-label" for="ctfCustomFlag">🏴 Flag Format:</label>
+                        <input type="text" id="ctfCustomFlag" class="ctf-flag-input"
+                            placeholder="e.g. TCP1P,COMPFEST,GEMASTIK (comma separated)">
+                        <div class="ctf-flag-hint">Built-in: CTF, FLAG, HTB, THM, picoCTF, DUCTF, LKS + your custom
+                        </div>
+                    </div>
+                    <div class="ctf-buttons">
+                        <button class="ctf-btn ctf-btn-auto" id="ctfAutoSolve"
+                            title="⚡ Jalankan SEMUA scanner sekaligus (Alt+A)">
+                            ⚡ Auto Solve
+                        </button>
+                        <button class="ctf-btn ctf-btn-flag" id="ctfFindFlag"
+                            title="Scan semua paket untuk pola flag (CTF{}, FLAG{}, flag{}, dll)">
+                            🚩 Find Flags
+                        </button>
+                        <button class="ctf-btn ctf-btn-strings" id="ctfExtractStrings"
+                            title="Extract semua readable strings dari payload paket">
+                            📝 Extract Strings
+                        </button>
+                        <button class="ctf-btn ctf-btn-base64" id="ctfBase64"
+                            title="Detect & decode Base64 strings dalam payload">
+                            🔓 Base64 Decode
+                        </button>
+                        <button class="ctf-btn ctf-btn-creds" id="ctfCredentials"
+                            title="Cari password, username, token, secret di payload">
+                            🔑 Find Credentials
+                        </button>
+                        <button class="ctf-btn ctf-btn-urls" id="ctfURLs" title="Extract semua URLs dari paket">
+                            🌐 Extract URLs
+                        </button>
+                        <button class="ctf-btn ctf-btn-files" id="ctfFiles"
+                            title="Detect file signatures (PDF, PNG, ZIP, EXE, dll)">
+                            📁 Detect Files
+                        </button>
+                    </div>
+                    <div class="ctf-quick-filters">
+                        <span class="ctf-qf-label">Quick:</span>
+                        <button class="ctf-qf" data-filter="http-only" title="Filter HTTP only">HTTP</button>
+                        <button class="ctf-qf" data-filter="dns-only" title="Filter DNS only">DNS</button>
+                        <button class="ctf-qf" data-filter="ftp" title="Filter FTP (port 21)">FTP</button>
+                        <button class="ctf-qf" data-filter="telnet" title="Filter Telnet (port 23)">Telnet</button>
+                        <button class="ctf-qf" data-filter="smtp" title="Filter SMTP (port 25)">SMTP</button>
+                        <button class="ctf-qf" data-filter="ssh" title="Filter SSH (port 22)">SSH</button>
+                        <button class="ctf-qf" data-filter="data-packets"
+                            title="Paket dengan payload data (PSH+ACK)">Data
+                            Only</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <!-- Left: Packet Table + Charts -->
+                <div class="content-left">
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h3 class="chart-title">Protocol Distribution</h3>
+                            <div class="chart-body" id="protocolChart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3 class="chart-title">Top Conversations</h3>
+                            <div class="chart-body" id="conversationChart"></div>
+                        </div>
+                        <div class="chart-card">
+                            <h3 class="chart-title">
+                                Alerts & Findings
+                                <span class="alert-badge" id="alertCount">0</span>
+                            </h3>
+                            <div class="chart-body alerts-list" id="alertsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Packet Table -->
+                    <div class="table-container">
+                        <div class="table-header-row">
+                            <div class="th th-no">No.</div>
+                            <div class="th th-time">Time</div>
+                            <div class="th th-src">Source</div>
+                            <div class="th th-dst">Destination</div>
+                            <div class="th th-proto">Protocol</div>
+                            <div class="th th-len">Length</div>
+                            <div class="th th-info">Info</div>
+                        </div>
+                        <div class="table-body" id="packetTable">
+                            <!-- Virtual scrolling rows injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Packet Detail Panel -->
+                <div class="content-right" id="detailPanel" style="display:none;">
+                    <div class="detail-header">
+                        <h3 class="detail-title">Packet Detail</h3>
+                        <button class="btn-close" id="btnCloseDetail">&times;</button>
+                    </div>
+                    <div class="detail-body">
+                        <div class="detail-section" id="detailHeaders">
+                            <!-- Packet header details -->
+                        </div>
+                        <div class="detail-section">
+                            <h4 class="detail-section-title">Hex Dump</h4>
+                            <div class="hex-viewer" id="hexViewer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CTF Results Modal -->
+    <div class="ctf-modal-overlay" id="ctfModal" style="display:none;"
+        onclick="if(event.target===this)this.style.display='none'">
+        <div class="ctf-modal">
+            <div class="ctf-modal-header">
+                <h3 class="ctf-modal-title" id="ctfModalTitle">Results</h3>
+                <div class="ctf-modal-actions">
+                    <button class="btn btn-sm btn-ghost" id="ctfCopyValues" title="Copy values saja (tanpa metadata)">📄
+                        Copy Values</button>
+                    <button class="btn btn-sm btn-ghost" id="ctfCopyDecoded" title="Copy decoded values saja">🔓 Copy
+                        Decoded</button>
+                    <button class="btn btn-sm btn-ghost" id="ctfCopyAll" title="Copy semua dgn metadata">📋 Copy
+                        All</button>
+                    <button class="btn-close"
+                        onclick="document.getElementById('ctfModal').style.display='none'">&times;</button>
+                </div>
+            </div>
+            <div class="ctf-modal-body" id="ctfModalBody">
+                <!-- Results populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="pcap-parser.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
